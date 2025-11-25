@@ -30,20 +30,20 @@ import LessonDetailPage from './components/lessons/LessonPage'
 import SubscribedSeriesPage from './pages/SubscribeSeriesPage'
 
 // Initialize AWS Amplify with v6 configuration
-// Amplify.configure(awsConfig);
+Amplify.configure(awsConfig);
 
 // Configure token signing for Cognito
-// cognitoUserPoolsTokenProvider.setKeyValueStorage({
-//   getItem(key) {
-//     return localStorage.getItem(key);
-//   },
-//   setItem(key, value) {
-//     localStorage.setItem(key, value);
-//   },
-//   removeItem(key) {
-//     localStorage.removeItem(key);
-//   }
-// });
+cognitoUserPoolsTokenProvider.setKeyValueStorage({
+  getItem(key) {
+    return localStorage.getItem(key);
+  },
+  setItem(key, value) {
+    localStorage.setItem(key, value);
+  },
+  removeItem(key) {
+    localStorage.removeItem(key);
+  }
+});
 
 function App() {
   return (
@@ -71,66 +71,66 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <Dashboard />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/change-password" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <ChangePassword />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/profile" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <ProfilePage />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/explore" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <ExplorePage />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/series" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <SeriesManagementPage />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/create-series" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <Navigate to="/series?action=create" replace />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
 
           {/* Series Routes */}
           <Route path="/series/:seriesId" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <SeriesDetailPage />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
 
           {/* Instructor Profile Routes */}
           <Route path="/instructor/:instructorId" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <InstructorProfile />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           <Route path="/instructor/:instructorId/from-series/:seriesId" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <InstructorProfile />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
 
           {/* Lesson Routes */}
           <Route path="/series/:seriesId/lessons/:lessonId" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <LessonDetailPage />
-            </PublicRoute>
+            </ProtectedRoute>
           } />
           {/* Subscribe Series Routes */}
           <Route path="/subscribe" element={
-            <PublicRoute>
+            <ProtectedRoute>
               <SubscribedSeriesPage />
-            </PublicRoute>}
+            </ProtectedRoute>}
           />
           {/* Catch-all route for 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
