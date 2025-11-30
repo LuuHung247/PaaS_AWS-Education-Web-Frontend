@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useResponsiveSidebar, useLessonData, useLessonNavigation } from '../../hooks';
 import CommentSection from '../courses/CommentSection';
@@ -6,9 +6,15 @@ import LessonContent from './LessonContent';
 import LessonSidebar from './LessonSidebar';
 import LessonNavigation from './LessonNavigation';
 import LessonHeader from './LessonHeader';
-import LessonDetails from './LessonDetails';
 import LessonLoadingState from './LessonLoadingState';
 import LessonErrorState from './LessonErrorState';
+
+// Import components
+import LessonOverview from './LessonOverview';
+import LessonArticle from './LessonArticle';
+import LessonTimestamps from './LessonTimestamps';
+
+import { DocumentTextIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import '../../styles/lessonDetail.css';
 import '../../styles/lessonSidebar.css';
 
@@ -16,34 +22,41 @@ const LessonDetailPage = () => {
     const { seriesId, lessonId } = useParams();
     const navigate = useNavigate();
     const mainContentRef = useRef(null);
+    const videoRef = useRef(null); // Ref để điều khiển video
+    const [activeTab, setActiveTab] = useState('overview');
 
     // Custom hooks
-    const [isSidebarOpen, toggleSidebar] = useResponsiveSidebar(false, 1024); // Start with sidebar closed on mobile
+    const [isSidebarOpen, toggleSidebar] = useResponsiveSidebar(false, 1024);
     const { lesson, series, allLessons, loading, error } = useLessonData(seriesId, lessonId);
-
-    // Find the current index, next and prev lesson
     const { prevLesson, nextLesson } = useLessonNavigation(allLessons, lessonId);
 
-    // Handle series completion navigation
     const handleCompleteSeries = () => {
         navigate(`/series/${seriesId}`);
     };
 
-    if (loading) {
-        return <LessonLoadingState />;
-    }
+    // Hàm xử lý tua video
+    const handleJumpToTime = (seconds) => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = seconds;
+            videoRef.current.play().catch(e => console.log("Autoplay prevented:", e));
+            
+            // Cuộn mượt lên vị trí video nếu đang ở dưới
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
-    if (error) {
-        return <LessonErrorState error={error} seriesId={seriesId} />;
-    }
+    if (loading) return <LessonLoadingState />;
+    if (error) return <LessonErrorState error={error} seriesId={seriesId} />;
+    if (!lesson || !series) return <LessonErrorState notFound={true} seriesId={seriesId} />;
 
-    if (!lesson || !series) {
-        return <LessonErrorState notFound={true} seriesId={seriesId} />;
-    }
+    const tabs = [
+        { id: 'overview', label: 'Tổng quan', icon: InformationCircleIcon },
+        { id: 'content', label: 'Nội dung bài học', icon: DocumentTextIcon },
+        { id: 'timestamps', label: 'Mốc thời gian', icon: ClockIcon },
+    ];
 
     return (
-        <div className="lesson-detail-page min-h-screen flex flex-col bg-gray-50">
-            {/* Header Bar */}
+        <div className="lesson-detail-page min-h-screen flex flex-col bg-gray-50 font-sans">
             <LessonHeader
                 seriesId={seriesId}
                 series={series}
@@ -52,9 +65,7 @@ const LessonDetailPage = () => {
                 toggleSidebar={toggleSidebar}
             />
 
-            {/* Main Content Area */}
             <div className="flex-1 flex relative overflow-hidden">
-                {/* Sidebar - Fixed position, always visible on desktop */}
                 <LessonSidebar
                     series={series}
                     allLessons={allLessons}
@@ -62,79 +73,82 @@ const LessonDetailPage = () => {
                     isSidebarOpen={isSidebarOpen}
                     toggleSidebar={toggleSidebar}
                     seriesId={seriesId}
-                    className="fixed top-16 bottom-0 z-30 left-0 w-72 bg-white shadow-lg transition-transform duration-300 ease-in-out"
+                    className="fixed top-16 bottom-0 z-30 left-0 w-80 bg-white shadow-xl border-r border-gray-100 transition-transform duration-300 ease-in-out"
                     style={{ transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)' }}
                 />
 
-                {/* Main Content */}
                 <main
                     ref={mainContentRef}
-                    className={`w-full transition-all duration-300 ${isSidebarOpen ? 'lg:ml-72' : ''}`}
+                    className={`w-full transition-all duration-300 ${isSidebarOpen ? 'lg:ml-80' : ''}`}
                 >
-                    <div className="container mx-auto px-4 py-5 lg:px-8">
-                        {/* Simple Course Header */}
-                        <div className="bg-white rounded-lg shadow-sm p-4 mb-5 flex items-center">
-                            <div className="flex-1">
-                                <h1 className="text-xl font-bold text-gray-900">{series.title}</h1>
-                                <div className="flex items-center mt-1">
-                                    <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-md">
-                                        {series.lesson_category || 'Khóa học'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Video Player - Make it prominent */}
-                        <div className="mb-5 bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                    <div className="container mx-auto px-4 py-6 lg:px-8 max-w-6xl">
+                        {/* Video Player với ref */}
+                        <div className="bg-black rounded-xl overflow-hidden shadow-2xl mb-6 ring-1 ring-black/5">
                             <div className="aspect-video w-full">
-                                <LessonContent
-                                    lesson={lesson}
+                                <LessonContent 
+                                    lesson={lesson} 
+                                    ref={videoRef} 
                                 />
                             </div>
                         </div>
 
-                        {/* Lesson Navigation - Clean and modern */}
-                        <div className="bg-white rounded-lg shadow-sm p-4 mb-5">
+                        {/* Navigation Tabs */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                            <div className="border-b border-gray-200 bg-white sticky top-0 z-10 px-2 pt-2">
+                                <div className="flex overflow-x-auto no-scrollbar gap-2">
+                                    {tabs.map((tab) => {
+                                        const Icon = tab.icon;
+                                        const isActive = activeTab === tab.id;
+                                        return (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setActiveTab(tab.id)}
+                                                className={`
+                                                    relative flex items-center px-4 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 outline-none focus:outline-none rounded-t-lg
+                                                    ${isActive
+                                                        ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30'
+                                                        : 'text-gray-500 border-b-2 border-transparent hover:text-gray-900 hover:bg-gray-100'
+                                                    }
+                                                `}
+                                            >
+                                                <Icon className={`w-5 h-5 mr-2 transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                                                {tab.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="min-h-[300px]">
+                                {activeTab === 'overview' && (
+                                    <LessonOverview lesson={lesson} series={series} />
+                                )}
+                                {activeTab === 'content' && (
+                                    <LessonArticle lesson={lesson} />
+                                )}
+                                {activeTab === 'timestamps' && (
+                                    <LessonTimestamps 
+                                        lesson={lesson} 
+                                        onTimestampClick={handleJumpToTime} // Truyền hàm xử lý xuống
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
                             <LessonNavigation
                                 prevLesson={prevLesson}
                                 nextLesson={nextLesson}
                                 seriesId={seriesId}
                                 onCompleteSeries={handleCompleteSeries}
-                                toggleSidebar={toggleSidebar}
-                                isSidebarOpen={isSidebarOpen}
                             />
-                        </div>
-
-                        {/* Content and Comments - Stacked vertically layout */}
-                        <div className="space-y-5">
-                            {/* Lesson Content - Full width */}
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <div className="p-6">
-                                    <h2 className="text-xl font-bold mb-4 text-gray-900 border-b pb-2">Nội dung bài học</h2>
-                                    <div className="prose max-w-none">
-                                        <LessonDetails lesson={lesson} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Comments Section - Below content */}
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <div className="p-4">
-                                    <h3 className="text-lg font-bold mb-3 text-gray-900 border-b border-gray-100 pb-2 flex items-center">
-                                        <svg className="w-5 h-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                        </svg>
-                                        Thảo luận
-                                    </h3>
-                                    <CommentSection lessonId={lesson._id} />
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     );
-}
+};
 
 export default LessonDetailPage;
