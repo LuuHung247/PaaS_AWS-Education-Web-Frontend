@@ -14,7 +14,7 @@ import LessonOverview from './LessonOverview';
 import LessonArticle from './LessonArticle';
 import LessonTimestamps from './LessonTimestamps';
 
-import { DocumentTextIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, ClockIcon, InformationCircleIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import '../../styles/lessonDetail.css';
 import '../../styles/lessonSidebar.css';
 
@@ -61,8 +61,7 @@ const LessonDetailPage = () => {
                 seriesId={seriesId}
                 series={series}
                 allLessons={allLessons}
-                isSidebarOpen={isSidebarOpen}
-                toggleSidebar={toggleSidebar}
+                
             />
 
             <div className="flex-1 flex relative overflow-hidden">
@@ -81,6 +80,20 @@ const LessonDetailPage = () => {
                     ref={mainContentRef}
                     className={`w-full transition-all duration-300 ${isSidebarOpen ? 'lg:ml-80' : ''}`}
                 >
+                    {/* --- NÚT MỞ MENU (Chỉ hiện khi Sidebar đóng) --- */}
+                    {!isSidebarOpen && (
+                        <button
+                            onClick={toggleSidebar}
+                            className="fixed left-0 top-20 z-20 bg-indigo-600 text-white p-3 rounded-r-3xl shadow-lg hover:bg-indigo-700 transition-all duration-200 flex items-center gap-1 group"
+                            title="Mở danh sách bài học"
+                        >
+                            <ListBulletIcon className="w-6 h-6" />
+                            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap text-base font-medium">
+                                Bài học
+                            </span>
+                        </button>
+                    )}
+                    {/* ------------------------------------------------ */}
                     <div className="container mx-auto px-4 py-6 lg:px-8 max-w-6xl">
                         {/* Video Player với ref */}
                         <div className="bg-black rounded-xl overflow-hidden shadow-2xl mb-6 ring-1 ring-black/5">

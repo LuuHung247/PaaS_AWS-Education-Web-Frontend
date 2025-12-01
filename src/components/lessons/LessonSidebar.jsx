@@ -1,38 +1,40 @@
-// Component for lesson sidebar with series progress and lesson list
 import { Link } from 'react-router-dom';
+import { XMarkIcon } from '@heroicons/react/24/outline'; // Import icon đóng
 
-/**
- * Sidebar component displaying lesson list and series progress
- * @param {Object} series - The series object
- * @param {Array} allLessons - Array of all lessons in the series
- * @param {string} currentLessonId - ID of the currently active lesson
- * @param {boolean} isSidebarOpen - Whether the sidebar is open
- * @param {string} seriesId - The ID of the series
- */
 const LessonSidebar = ({
     series,
     allLessons,
     currentLessonId,
     seriesId,
     className,
-    style
+    style,
+    toggleSidebar // Nhận thêm prop này để xử lý đóng
 }) => {
     if (!series || !allLessons) return null;
-
-    // No progress tracking needed
 
     return (
         <aside
             className={className || `fixed top-16 bottom-0 z-30 left-0 w-72 bg-white shadow-lg transition-transform duration-300 ease-in-out`}
             style={style}
         >
-            <div className="h-full flex flex-col overflow-y-auto">        
+            <div className="h-full flex flex-col">
+                
+                {/* --- PHẦN MỚI THÊM: Header của Sidebar --- */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+                    <h3 className="font-bold text-gray-900 text-lg">Danh sách bài học</h3>
+                    <button 
+                        onClick={toggleSidebar}
+                        className="p-1 rounded-md text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                        title="Đóng danh sách"
+                    >
+                        <XMarkIcon className="w-6 h-6" />
+                    </button>
+                </div>
+                {/* ----------------------------------------- */}
 
                 {/* Lesson List */}
                 <div className="flex-1 overflow-y-auto p-4">
-                    <h3 className="font-medium text-gray-900 mb-3 px-2">Danh sách bài học</h3>
-
-                    {/* If there are sections in the series */}
+                    {/* (Giữ nguyên phần render danh sách bài học cũ) */}
                     {series.sections && series.sections.length > 0 ? (
                         series.sections.map((section, sectionIndex) => (
                             <div key={section._id || `section-${sectionIndex}`} className="mb-6">
@@ -49,7 +51,7 @@ const LessonSidebar = ({
                                             key={item._id}
                                             to={`/series/${seriesId}/lessons/${item._id}`}
                                             className={`flex items-center px-3 py-2 rounded-md transition-colors ${item._id === currentLessonId
-                                                ? 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-500'
+                                                ? 'bg-indigo-50 text-indigo-700'
                                                 : 'text-gray-700 hover:bg-gray-50'
                                                 }`}
                                         >
@@ -63,14 +65,13 @@ const LessonSidebar = ({
                             </div>
                         ))
                     ) : (
-                        // If no sections, display flat list of lessons
                         <div className="space-y-1">
                             {allLessons.map((item, index) => (
                                 <Link
                                     key={item._id}
                                     to={`/series/${seriesId}/lessons/${item._id}`}
                                     className={`flex items-center px-3 py-2 rounded-md transition-colors ${item._id === currentLessonId
-                                        ? 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-500'
+                                        ? 'bg-indigo-50 text-indigo-700 '
                                         : 'text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
