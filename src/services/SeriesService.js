@@ -39,21 +39,21 @@ class SeriesService {
     try {
       // Luôn sử dụng FormData để đảm bảo xử lý file đúng cách
       const formData = new FormData();
-      
+
       // Thêm các trường thông tin series với tên chính xác
       formData.append("serie_title", seriesData.serie_title || "");
       formData.append("serie_description", seriesData.serie_description || "");
       formData.append("serie_category", seriesData.serie_category || "");
-      
+
       if (seriesData.isPublished !== undefined) {
         formData.append("isPublished", seriesData.isPublished);
       }
-      
+
       // Thêm file thumbnail nếu có
       if (thumbnailFile) {
         formData.append("serie_thumbnail", thumbnailFile);
       }
-      
+
       // Gửi request với Content-Type là multipart/form-data
       const response = await this.api.post("/series", formData, {
         headers: {
@@ -85,7 +85,7 @@ class SeriesService {
    */
   async getUserSeries() {
     try {
-      const response = await this.api.get("/series/created");
+      const response = await this.api.get("/series/me");
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -104,7 +104,7 @@ class SeriesService {
     } catch (error) {
       throw this.handleError(error);
     }
-  }    
+  }
   /**
    * Cập nhật một phần thông tin series
    * @param {string|number} seriesId - ID của series cần cập nhật
@@ -117,7 +117,7 @@ class SeriesService {
       // Sử dụng FormData nếu có file thumbnail, nếu không sử dụng JSON
       if (thumbnailFile) {
         const formData = new FormData();
-        
+
         // Thêm các trường thông tin series
         if (updateData.serie_title !== undefined) {
           formData.append("serie_title", updateData.serie_title);
@@ -131,10 +131,10 @@ class SeriesService {
         if (updateData.isPublished !== undefined) {
           formData.append("isPublished", updateData.isPublished);
         }
-        
+
         // Thêm file thumbnail
         formData.append("serie_thumbnail", thumbnailFile);
-        
+
         const response = await this.api.patch(`/series/${seriesId}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -143,7 +143,10 @@ class SeriesService {
         return response.data;
       } else {
         // Nếu không có file, sử dụng JSON
-        const response = await this.api.patch(`/series/${seriesId}`, updateData);
+        const response = await this.api.patch(
+          `/series/${seriesId}`,
+          updateData
+        );
         return response.data;
       }
     } catch (error) {
@@ -193,12 +196,12 @@ class SeriesService {
    */
   async searchSeriesByTitle(keyword) {
     try {
-      if (!keyword || keyword.trim() === '') {
-        throw new Error('Từ khóa tìm kiếm không được để trống');
+      if (!keyword || keyword.trim() === "") {
+        throw new Error("Từ khóa tìm kiếm không được để trống");
       }
-      
-      const response = await this.api.get('/series/search', {
-        params: { keyword }
+
+      const response = await this.api.get("/series/search", {
+        params: { keyword },
       });
       return response.data;
     } catch (error) {
@@ -230,7 +233,7 @@ class SeriesService {
       const response = await this.api.post(`/series/${seriesId}/unsubscribe`);
       return response.data;
     } catch (error) {
-      const message = error?.response?.data?.result?.message
+      const message = error?.response?.data?.result?.message;
       return Promise.reject(message);
     }
   }
@@ -241,7 +244,7 @@ class SeriesService {
    */
   async getAllSeriesSubscribe() {
     try {
-      const response = await this.api.get("/series/subscribed");
+      const response = await this.api.get("/series/subscriptions");
       return response.data;
     } catch (error) {
       throw this.handleError(error);
