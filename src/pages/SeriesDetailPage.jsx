@@ -15,6 +15,7 @@ import EditSeriesModal from '../components/series/EditSeriesModal';
 import SuccessModal from '../components/common/SuccessModal';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import ErrorModal from '../components/common/ErrorModal';
+import NotificationModal from '../components/series/NotificationModal';
 
 const SeriesDetailPage = () => {
     const { seriesId } = useParams();
@@ -28,7 +29,8 @@ const SeriesDetailPage = () => {
 
     const [modals, setModals] = useState({
         createLesson: false, deleteLesson: false, editSeries: false, editLesson: false,
-        selectedLesson: null, subscribeSuccess: false, unsubscribeConfirm: false, subscribeError: null
+        selectedLesson: null, subscribeSuccess: false, unsubscribeConfirm: false, subscribeError: null,
+        notification: false
     });
 
     const [formData, setFormData] = useState({
@@ -193,6 +195,29 @@ const SeriesDetailPage = () => {
                     unsubscribeConfirm: false,
                     subscribeError: error || 'Lỗi khi hủy đăng ký theo dõi'
                 }));
+            }
+        },
+
+        sendNotification: async (data) => {
+            setState(prev => ({ ...prev, isSubmitting: true }));
+            try {
+                // Here you would typically call an API to send the notification
+                // For now, we'll just simulate the action
+                console.log('Sending notification:', data);
+                
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Close the modal
+                setModals(prev => ({ ...prev, notification: false }));
+                
+                // Show success message (you might want to add a success modal)
+                alert('Thông báo đã được gửi thành công đến học viên!');
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                alert('Có lỗi xảy ra khi gửi thông báo. Vui lòng thử lại.');
+            } finally {
+                setState(prev => ({ ...prev, isSubmitting: false }));
             }
         }
     };
@@ -436,12 +461,20 @@ const SeriesDetailPage = () => {
                                     📚 Danh sách bài học
                                 </h2>
                                 {isOwner && (
-                                    <Button
-                                        onClick={() => setModals(prev => ({ ...prev, createLesson: true }))}
-                                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                                    >
-                                        ➕ Thêm bài học
-                                    </Button>
+                                    <div className="flex gap-3">
+                                        <Button
+                                            onClick={() => setModals(prev => ({ ...prev, createLesson: true }))}
+                                            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                        >
+                                            Thêm bài học
+                                        </Button>
+                                        <Button
+                                            onClick={() => setModals(prev => ({ ...prev, notification: true }))}
+                                            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                        >
+                                            Thông báo
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
 
@@ -628,6 +661,16 @@ const SeriesDetailPage = () => {
                     isOpen={!!modals.subscribeError}
                     onClose={() => setModals(prev => ({ ...prev, subscribeError: null }))}
                     message={modals.subscribeError}
+                />
+            )}
+
+            {/* Notification Modal */}
+            {modals.notification && (
+                <NotificationModal
+                    isOpen={modals.notification}
+                    onClose={() => setModals(prev => ({ ...prev, notification: false }))}
+                    onSubmit={handlers.sendNotification}
+                    isSubmitting={isSubmitting}
                 />
             )}
         </MainLayout>

@@ -128,13 +128,13 @@ const Dashboard = () => {
                             <div className="relative px-6 py-12 md:py-16 md:px-12 text-white">
                                 <h2 className="text-2xl md:text-3xl font-bold mb-4">Chào mừng, {userAttributes.name || 'bạn'}!</h2>
                                 <p className="text-lg md:text-xl mb-6 text-indigo-100 max-w-3xl">
-                                    Khám phá và chia sẻ kiến thức trên EduConnect - nền tảng học tập cộng đồng hàng đầu.
+                                    Khám phá và chia sẻ kiến thức trên EduConnect.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <Link to="/series" className="px-6 py-3 bg-white text-indigo-700 font-medium rounded-lg hover:bg-opacity-90 transition shadow-lg">
+                                    <Link to="/explore" className="px-6 py-3 bg-white text-indigo-700 font-medium rounded-lg hover:bg-opacity-90 transition shadow-lg">
                                         Khám phá khóa học
                                     </Link>
-                                    <Link to="/series-management" className="px-6 py-3 bg-indigo-700 bg-opacity-40 border border-white text-white font-medium rounded-lg hover:bg-opacity-60 transition">
+                                    <Link to="/series" className="px-6 py-3 bg-indigo-700 bg-opacity-40 border border-white text-white font-medium rounded-lg hover:bg-opacity-60 transition">
                                         Tạo khóa học
                                     </Link>
                                 </div>
@@ -205,7 +205,7 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
-                                        <Link to="/account-settings" className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
+                                        <Link to="/profile" className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
                                             Cập nhật thông tin
                                         </Link>
                                         <Link to="/change-password" className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition">
@@ -222,7 +222,7 @@ const Dashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {categories.map(category => (
                                     <Link
-                                        to={`/series?category=${category.id}`}
+                                        to={`/explore?category=${encodeURIComponent(category.title)}`}
                                         key={category.id}
                                         className="bg-white rounded-xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 group"
                                     >
@@ -236,41 +236,8 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* Platform Features */}
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Tính năng nổi bật của nền tảng</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {features.map(feature => (
-                                    <div key={feature.id} className="bg-white rounded-xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition">
-                                        <div className="flex">
-                                            <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 mr-4">
-                                                {feature.icon}
-                                            </div>
-                                            <div>
-                                                <h4 className="text-lg font-medium text-gray-900 mb-2">{feature.title}</h4>
-                                                <p className="text-gray-600">{feature.description}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* CTA Section */}
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white text-center">
-                            <h3 className="text-2xl font-bold mb-4">Sẵn sàng chia sẻ kiến thức của bạn?</h3>
-                            <p className="text-lg text-blue-100 mb-6 max-w-2xl mx-auto">
-                                Tạo khóa học, đăng bài giảng và chia sẻ kiến thức của bạn với hàng ngàn người học trên EduConnect.
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <Link to="/series-management" className="inline-block px-6 py-3 bg-white text-indigo-700 font-medium rounded-lg hover:bg-indigo-50 transition shadow-lg">
-                                    Tạo khóa học ngay
-                                </Link>
-                                <Link to="/community" className="inline-block px-6 py-3 bg-indigo-600 bg-opacity-40 border border-white text-white font-medium rounded-lg hover:bg-opacity-60 transition">
-                                    Tham gia cộng đồng
-                                </Link>
-                            </div>
-                        </div>
+                       
+                        
                     </div>
                 );
 
@@ -311,10 +278,10 @@ const Dashboard = () => {
                             </div>
 
                             <div className="flex gap-4">
-                                <Link to="/series" className="inline-block px-5 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
+                                <Link to="/explore" className="inline-block px-5 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
                                     Khám phá khóa học
                                 </Link>
-                                <Link to="/series-management" className="inline-block px-5 py-2 border border-indigo-600 text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition">
+                                <Link to="/series" className="inline-block px-5 py-2 border border-indigo-600 text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition">
                                     Tạo khóa học mới
                                 </Link>
                             </div>
@@ -495,13 +462,13 @@ const Dashboard = () => {
                             <p className="text-lg text-gray-600">Chào mừng quay trở lại, {userAttributes.name || 'bạn'}!</p>
                         </div>
                         <div className="mt-4 md:mt-0 flex gap-3">
-                            <Link to="/series" className="inline-flex items-center px-4 py-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-700 transition">
+                            <Link to="/explore" className="inline-flex items-center px-4 py-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-700 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                 </svg>
                                 Khám phá khóa học
                             </Link>
-                            <Link to="/series-management" className="inline-flex items-center px-4 py-2 border border-indigo-600 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
+                            <Link to="/series" className="inline-flex items-center px-4 py-2 border border-indigo-600 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
@@ -513,35 +480,7 @@ const Dashboard = () => {
                     <div className="bg-white rounded-2xl shadow-md overflow-hidden mb-8">
                         <div className="border-b border-gray-200">
                             <div className="px-4 sm:px-8">
-                                <nav className="flex space-x-6 overflow-x-auto">
-                                    <button
-                                        onClick={() => setActiveTab('welcome')}
-                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-base transition-colors duration-200 ease-in-out ${activeTab === 'welcome'
-                                            ? 'border-indigo-600 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        Trang chủ
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('explore')}
-                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-base transition-colors duration-200 ease-in-out ${activeTab === 'explore'
-                                            ? 'border-indigo-600 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        Chia sẻ & Học tập
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('profile')}
-                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-base transition-colors duration-200 ease-in-out ${activeTab === 'profile'
-                                            ? 'border-indigo-600 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        Hồ sơ cá nhân
-                                    </button>
-                                </nav>
+                                
                             </div>
                         </div>
                         <div className="p-6 sm:p-8">
@@ -554,7 +493,7 @@ const Dashboard = () => {
             {/* Custom CSS for pattern background */}
             <style jsx="true">{`
                 .pattern-grid {
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
                 }
             `}</style>
         </MainLayout>

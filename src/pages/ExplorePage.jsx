@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import SearchHero from '../components/explore/SearchHero';
 import SearchFilters from '../components/explore/SearchFilters';
@@ -15,6 +16,7 @@ const ExplorePage = () => {
     const [sortOption, setSortOption] = useState('relevance');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // Handle search action
     const handleSearch = useCallback(async (query) => {
@@ -39,7 +41,14 @@ const ExplorePage = () => {
     const handleApplyFilters = useCallback((categories) => {
         setSelectedCategories(categories);
         setPage(1); // Reset to first page when filters change
-    }, []);
+        
+        // Update URL with category filter
+        if (categories.length > 0) {
+            setSearchParams({ category: categories.join(',') });
+        } else {
+            setSearchParams({});
+        }
+    }, [setSearchParams]);
 
     // Handle sort changes
     const handleSortChange = useCallback((option) => {
@@ -94,6 +103,17 @@ const ExplorePage = () => {
 
         loadInitialSeries();
     }, []);
+
+    // Handle URL parameter changes
+    useEffect(() => {
+        const categoryParam = searchParams.get('category');
+        if (categoryParam) {
+            const categories = categoryParam.split(',');
+            setSelectedCategories(categories);
+        } else {
+            setSelectedCategories([]);
+        }
+    }, [searchParams]);
 
     // Get the final data to display
     const processedResults = processResults();

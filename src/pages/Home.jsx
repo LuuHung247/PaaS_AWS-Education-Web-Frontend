@@ -76,7 +76,7 @@ const Home = () => {
 
                             <div className="flex flex-wrap gap-4">
                                 <Link
-                                    to="/register"
+                                    to="/series"
                                     className="px-8 py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300"
                                 >
                                     Start Creating
@@ -315,28 +315,7 @@ const Home = () => {
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2/3 h-2/3 bg-indigo-600 rounded-full opacity-20 filter blur-3xl"></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="text-4xl font-bold text-white mb-6">Ready to Transform Your Teaching?</h2>
-                        <p className="text-xl text-indigo-200 mb-10 max-w-2xl mx-auto">
-                            Join our platform today and start creating impactful educational experiences that reach students worldwide.
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-4">
-                            <Link
-                                to="/register"
-                                className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300"
-                            >
-                                Start Your Journey
-                            </Link>
-                            <Link
-                                to="/demo"
-                                className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white font-semibold hover:bg-white/20 hover:translate-y-[-2px] transition-all duration-300"
-                            >
-                                Watch Demo
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                
             </section>
         </MainLayout>
     );

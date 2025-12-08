@@ -5,11 +5,12 @@ import '../../styles/explore.css';
 // Categories used for filtering - could be fetched from an API in a real app
 const CATEGORIES = [
     { id: 'programming', name: 'Lập trình', icon: '💻' },
+    { id: 'design', name: 'Thiết kế', icon: '🎨' },
+    { id: 'business', name: 'Kinh doanh', icon: '💼' },
+    { id: 'personal-dev', name: 'Phát triển cá nhân', icon: '📈' },
     { id: 'languages', name: 'Ngôn ngữ', icon: '🗣️' },
     { id: 'soft-skills', name: 'Kỹ năng mềm', icon: '🤝' },
-    { id: 'design', name: 'Thiết kế', icon: '🎨' },
     { id: 'marketing', name: 'Marketing', icon: '📈' },
-    { id: 'business', name: 'Kinh doanh', icon: '💼' },
     { id: 'science', name: 'Khoa học', icon: '🔬' },
     { id: 'math', name: 'Toán học', icon: '🔢' },
     { id: 'music', name: 'Âm nhạc', icon: '🎵' },
