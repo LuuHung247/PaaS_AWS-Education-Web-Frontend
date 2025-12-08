@@ -29,26 +29,11 @@ const AvatarModal = ({ isOpen, onClose, onSave }) => {
                     </div>
                     
                     <form onSubmit={handleSubmit}>
-                        <div className="mb-4">
-                            <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                                Avatar URL
-                            </label>
-                            <input
-                                type="text"
-                                id="avatarUrl"
-                                className="block w-full px-4 py-3 border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-300"
-                                placeholder="Enter image URL"
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                            />
-                            <p className="mt-2 text-sm text-gray-500">
-                                Enter a valid image URL or upload an image
-                            </p>
-                        </div>
+                        
                         
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Or Upload Image
+                                Upload Image
                             </label>
                             <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                 <div className="space-y-1 text-center">
