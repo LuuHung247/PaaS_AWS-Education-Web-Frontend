@@ -5,7 +5,7 @@ import FormInput from '../auth/FormInput';
 import FormSelect from '../auth/FormSelect';
 import { updateUserProfile } from '../../services/UserService';
 
-const UserProfile = () => {
+const UserProfile = ({ onAvatarClick }) => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -138,8 +138,17 @@ const UserProfile = () => {
             {/* Header with profile picture section */}
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
                 <div className="flex items-center">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 text-3xl font-bold uppercase mr-4 border-4 border-white shadow-lg">
-                        {profileData.name ? profileData.name.charAt(0) : 'U'}
+                    <div className="relative group">
+                        <button 
+                            className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 text-3xl font-bold uppercase mr-4 border-4 border-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            onClick={onAvatarClick}
+                            aria-label="Change avatar"
+                        >
+                            {profileData.name ? profileData.name.charAt(0) : 'U'}
+                        </button>
+                        <div className="absolute bottom-0 right-4 bg-indigo-600 text-white text-center text-xs rounded-full py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                            Change avatar
+                        </div>
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">{profileData.name || 'Your Profile'}</h1>

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import UserProfile from '../components/profile/UserProfile';
+import AvatarModal from '../components/profile/AvatarModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const ProfilePage = () => {
     const {loading } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
 
     // Redirect to login if not authenticated is handled by ProtectedRoute
 
@@ -17,6 +19,12 @@ const ProfilePage = () => {
             </div>
         );
     }
+
+    const handleSaveAvatar = (avatarUrl) => {
+        // Handle avatar update logic here
+        console.log('Avatar URL:', avatarUrl);
+        // You would typically update the user's profile with the new avatar URL
+    };
 
     return (
         <MainLayout>
@@ -32,7 +40,7 @@ const ProfilePage = () => {
                             
                         </div>
                         <div className="p-6">
-                            {activeTab === 'profile' && <UserProfile />}
+                            {activeTab === 'profile' && <UserProfile onAvatarClick={() => setShowAvatarModal(true)} />}
                             {activeTab === 'security' && (
                                 <div className="bg-white p-6">
                                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Security Settings</h2>
@@ -120,6 +128,12 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </div>
+            
+            <AvatarModal 
+                isOpen={showAvatarModal}
+                onClose={() => setShowAvatarModal(false)}
+                onSave={handleSaveAvatar}
+            />
         </MainLayout>
     );
 };
