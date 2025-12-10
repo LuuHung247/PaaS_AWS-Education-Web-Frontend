@@ -4,9 +4,11 @@ import UserProfile from '../components/profile/UserProfile';
 import AvatarModal from '../components/profile/AvatarModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { updateUserProfile } from '../services/UserService';
 
 const ProfilePage = () => {
-    const {loading } = useAuth();
+    const {user, loading } = useAuth();
+    // eslint-disable-next-line no-unused-vars
     const [activeTab, setActiveTab] = useState('profile');
     const [showAvatarModal, setShowAvatarModal] = useState(false);
 
@@ -20,13 +22,26 @@ const ProfilePage = () => {
         );
     }
 
-    const handleSaveAvatar = (avatarUrl, coverImage) => {
-        // Handle avatar update logic here
-        console.log('Avatar URL:', avatarUrl);
-        console.log('Cover Image:', coverImage);
-        // You would typically update the user's profile with the new avatar URL
-        // If coverImage is provided, you would upload it to your storage service
-        // and then update the user's profile with the new avatar URL
+    // eslint-disable-next-line no-unused-vars
+    const handleSaveAvatar = async (avatarUrl, coverImage) => {
+       try {
+            const userId = user.userId || user.data?._id || user.data?.cognito_sub;
+            
+            if (!userId) {
+                console.error("User ID not found");
+                return;
+            }
+
+            await updateUserProfile(userId, { 
+                avatar: avatarUrl 
+            });
+
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Failed to update avatar:", error);
+            alert("Failed to save avatar. Please try again.");
+        }
     };
 
     return (

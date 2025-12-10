@@ -11,6 +11,7 @@ const UserProfile = ({ onAvatarClick }) => {
     const [saving, setSaving] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [activeSection, setActiveSection] = useState('personal');
     const [profileData, setProfileData] = useState({
         name: '',
@@ -150,7 +151,15 @@ const UserProfile = ({ onAvatarClick }) => {
                             onClick={onAvatarClick}
                             aria-label="Change avatar"
                         >
-                            {profileData.name ? profileData.name.charAt(0) : 'U'}
+                            {profileData.avatar ? (
+                                <img 
+                                    src={profileData.avatar} 
+                                    alt={profileData.name} 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                profileData.name ? profileData.name.charAt(0) : 'U'
+                            )}
                         </button>
                         <div className="absolute bottom-0 right-4 bg-indigo-600 text-white text-center text-xs rounded-full py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                             Change avatar
