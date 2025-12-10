@@ -7,7 +7,7 @@ const NotificationModal = ({
     isOpen,
     onClose,
     onSubmit,
-    initialData = {}
+    initialData = null // SỬA: Đổi {} thành null để tránh tạo object mới liên tục gây re-render
 }) => {
     const [formData, setFormData] = useState({
         notification_title: '',
@@ -17,30 +17,36 @@ const NotificationModal = ({
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Populate form data if editing
+    // Populate form data if editing or reset when opening
     useEffect(() => {
-        if (initialData) {
+        if (isOpen) {
             setFormData({
-                notification_title: initialData.notification_title || '',
-                notification_content: initialData.notification_content || '',
+                notification_title: initialData?.notification_title || '',
+                notification_content: initialData?.notification_content || '',
             });
+            setErrors({}); // Xóa lỗi cũ nếu có
         }
-    }, [initialData]);
+    }, [isOpen, initialData]); // Thêm isOpen vào dependency
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        
+        // Update form data
+        setFormData(prevFormData => ({
+            ...prevFormData,
             [name]: value,
-        });
+        }));
 
         // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors({
-                ...errors,
-                [name]: null
-            });
-        }
+        setErrors(prevErrors => {
+            if (prevErrors[name]) {
+                return {
+                    ...prevErrors,
+                    [name]: null
+                };
+            }
+            return prevErrors;
+        });
     };
 
     const validateForm = () => {
@@ -74,18 +80,23 @@ const NotificationModal = ({
         }
     };
 
+    // Prevent closing modal when clicking inside the content
+    const handleContentClick = (e) => {
+        e.stopPropagation();
+    };
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 overflow-y-auto z-50 flex items-center justify-center">
-            <div className="fixed inset-0 transition-opacity" onClick={onClose}>
+        <div className="fixed inset-0 overflow-y-auto z-50 flex items-center justify-center" onClick={onClose}>
+            <div className="fixed inset-0 transition-opacity">
                 <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
 
-            <div className="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={handleContentClick}>
                 <div className="flex justify-between items-center p-4 border-b">
                     <h3 className="text-lg font-medium text-gray-900">
-                         Gửi thông báo đến học viên
+                         {initialData ? 'Cập nhật thông báo' : 'Gửi thông báo đến học viên'}
                     </h3>
                     <button
                         onClick={onClose}
@@ -110,7 +121,7 @@ const NotificationModal = ({
                                 name="notification_title"
                                 value={formData.notification_title}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.notification_title ? 'border-red-300' : 'border-gray-300'}`}
+                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.notification_title ? 'border-red-300' : 'border-gray-300'}`}
                                 placeholder="Nhập tiêu đề thông báo"
                             />
                             {errors.notification_title && (
@@ -128,7 +139,7 @@ const NotificationModal = ({
                                 rows={5}
                                 value={formData.notification_content}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.notification_content ? 'border-red-300' : 'border-gray-300'}`}
+                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.notification_content ? 'border-red-300' : 'border-gray-300'}`}
                                 placeholder="Nhập nội dung thông báo"
                             />
                             {errors.notification_content && (
