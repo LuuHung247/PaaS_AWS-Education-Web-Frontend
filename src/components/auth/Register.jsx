@@ -41,7 +41,7 @@ const Register = () => {
     const debouncedErrors = useDebounce(tempErrors, 800);
     const [confirmationCode, setConfirmationCode] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const { signUp, confirmSignUp, resendSignUpCode, googleSignIn, loading, error } = useAuth();
+    const { signUp, confirmSignUp, signIn, resendSignUpCode, googleSignIn, loading, error } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -194,12 +194,17 @@ const Register = () => {
 
         try {
             await confirmSignUp(formData.email, confirmationCode);
-            // The user data is already saved to DynamoDB in the confirmSignUp function in the AuthContext
-            navigate('/login', {
-                state: {
-                    message: 'Registration successful! Please sign in with your new account.'
-                }
-            });
+            try {
+                 await signIn(formData.email, formData.password);
+                 navigate('/'); 
+            } catch (loginErr) {
+                 console.error("Auto login failed", loginErr);
+                 navigate('/login', {
+                    state: {
+                        message: 'Registration successful! Please sign in.'
+                    }
+                });
+            }
         } catch (err) {
             throw Error(err);
         }

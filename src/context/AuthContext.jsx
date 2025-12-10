@@ -6,7 +6,8 @@ import {
     resendSignUpCode as amplifyResendSignUpCode,
     signInWithRedirect, 
     getCurrentUser, 
-    fetchAuthSession
+    fetchAuthSession,
+    fetchUserAttributes
 } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import axios from 'axios';
@@ -26,30 +27,38 @@ export const AuthProvider = ({ children }) => {
 
     const syncUserToBackend = async (additionalData = {}) => {
         try {
+            // 1. Lấy session hiện tại
             const session = await fetchAuthSession();
-            const currentUser = await getCurrentUser();
-            const token = session.tokens?.idToken?.toString();
-
-            if (!token) return null;
-
-            // eslint-disable-next-line no-unused-vars
-            const { name, email } = currentUser.signInDetails || {}
             
+            // 2. Kiểm tra ID Token
+            if (!session.tokens?.idToken) {
+                return null;
+            }
+
+            const idTokenObj = session.tokens.idToken;
+            const tokenString = idTokenObj.toString();
+            const payloadData = idTokenObj.payload;
+
+            console.log("ID Token Payload:", payloadData);
+
             const payload = {
-                name: currentUser.username,
-                email: currentUser.signInDetails?.loginId,
-                ...additionalData
+                cognito_sub: payloadData.sub,
+                email: additionalData.email || payloadData.email,                
+                name: additionalData.name || payloadData.name || payloadData.given_name || payloadData['cognito:username'],                
+                gender: additionalData.gender || payloadData.gender,
+                birthdate: additionalData.birthdate || payloadData.birthdate,
+                avatar: additionalData.avatar || payloadData.picture,
             };
 
             const response = await axios.post('http://localhost:5001/api/v1/users/sync', payload, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${tokenString}`,
                     'Content-Type': 'application/json'
                 }
             });
 
             console.log("Sync User Success:", response.data);
-            return response.data.data || response.data;
+            return response.data;
         } catch (err) {
             console.error("Failed to sync user to backend:", err);
             return null;
