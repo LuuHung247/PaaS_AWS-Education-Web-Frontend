@@ -152,8 +152,12 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
+            const username = email.replace(/[@.]/g, '-');
             // Format the birthdate as required by Cognito (ISO format)
-            let userAttributes = { ...attributes, email };
+            let userAttributes = { 
+                ...attributes, 
+                email: email 
+            };
 
             // Handle the cognito required attributes
             if (attributes.birthdate) {
@@ -165,7 +169,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             const result = await amplifySignUp({
-                username: email,
+                username: username,
                 password,
                 options: {
                     userAttributes
@@ -181,7 +185,8 @@ export const AuthProvider = ({ children }) => {
             // });
 
             // Store password and attributes temporarily for use during confirmation
-            sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(attributes));
+            sessionStorage.setItem(`temp_password_${email}`, password);
+            sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(userAttributes));
             // sessionStorage.setItem(`temp_password_${email}`, password);
             // sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(userAttributes));
             return result;
@@ -210,8 +215,18 @@ export const AuthProvider = ({ children }) => {
 
             return result;
         } catch (err) {
-            setError(err.message || 'Failed to confirm sign up');
-            throw err;
+            try {
+                const username = email.replace(/[@.]/g, '-');
+                const retryResult = await amplifyConfirmSignUp({
+                    username: username,
+                    confirmationCode: code
+                });
+                return retryResult;
+            // eslint-disable-next-line no-unused-vars
+            } catch (retryErr) {
+                setError(err.message || 'Failed to confirm sign up');
+                throw err;
+            }
         } finally {
             setLoading(false);
         }
