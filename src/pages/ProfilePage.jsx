@@ -20,10 +20,13 @@ const ProfilePage = () => {
         );
     }
 
-    const handleSaveAvatar = (avatarUrl) => {
+    const handleSaveAvatar = (avatarUrl, coverImage) => {
         // Handle avatar update logic here
         console.log('Avatar URL:', avatarUrl);
+        console.log('Cover Image:', coverImage);
         // You would typically update the user's profile with the new avatar URL
+        // If coverImage is provided, you would upload it to your storage service
+        // and then update the user's profile with the new avatar URL
     };
 
     return (
