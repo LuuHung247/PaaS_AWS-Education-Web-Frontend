@@ -41,7 +41,7 @@ const Register = () => {
     const debouncedErrors = useDebounce(tempErrors, 800);
     const [confirmationCode, setConfirmationCode] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const { signUp, confirmSignUp, resendSignUpCode, loading, error } = useAuth();
+    const { signUp, confirmSignUp, resendSignUpCode, googleSignIn, loading, error } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -170,10 +170,15 @@ const Register = () => {
 
     const handleGoogleSignUp = async (e) => {
         e.preventDefault();
-        // Simple handler for Google Sign-Up
-        // This will be modified later with actual implementation
-        console.log('Google Sign-Up clicked');
-        // TODO: Implement Google Sign-Up with AWS Amplify federatedSignIn
+        try {
+            await googleSignIn();
+        } catch (err) {
+            if (err.name === 'UserAlreadyAuthenticatedException' || err.message?.includes('already a signed in user')) {
+                navigate('/');
+            } else {
+                console.error("Google sign-up failed", err);
+            }
+        }
     };
 
     const handleConfirmSubmit = async (e) => {

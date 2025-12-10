@@ -12,9 +12,15 @@ const Login = () => {
     });
     const [formErrors, setFormErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
-    const { signIn, loading, error } = useAuth();
+    const { signIn, googleSignIn, loading, error, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/');
+        }
+    }, [isAuthenticated, navigate]);
 
     // Check for success message in location state (e.g., from registration)
     useEffect(() => {
@@ -80,9 +86,15 @@ const Login = () => {
     const handleGoogleSignIn = async (e) => {
         e.preventDefault();
         // Simple handler for Google Sign-In
-        // This will be modified later with actual implementation
-        console.log('Google Sign-In clicked');
-        // TODO: Implement Google Sign-In with AWS Amplify federatedSignIn
+        try {
+            await googleSignIn();
+        } catch (err) {
+            if (err.name === 'UserAlreadyAuthenticatedException' || err.message.includes('already a signed in user')) {
+                navigate('/login');
+            } else {
+                console.error("Google login failed", err);
+            }
+        }
     };
 
     return (

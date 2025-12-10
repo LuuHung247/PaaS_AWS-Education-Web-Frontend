@@ -3,9 +3,14 @@ import {
     signIn as amplifySignIn, signUp as amplifySignUp, confirmSignUp as amplifyConfirmSignUp,
     signOut as amplifySignOut, resetPassword, confirmResetPassword,
     updatePassword,
-    resendSignUpCode as amplifyResendSignUpCode
+    resendSignUpCode as amplifyResendSignUpCode,
+    signInWithRedirect, 
+    getCurrentUser, 
+    fetchAuthSession
 } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
+import axios from 'axios';
+// eslint-disable-next-line no-unused-vars
 import { createUserProfile, getCurrentUserProfile } from '../services/UserService';
 
 // Create Authentication Context
@@ -19,12 +24,52 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const syncUserToBackend = async (additionalData = {}) => {
+        try {
+            const session = await fetchAuthSession();
+            const currentUser = await getCurrentUser();
+            const token = session.tokens?.idToken?.toString();
+
+            if (!token) return null;
+
+            // eslint-disable-next-line no-unused-vars
+            const { name, email } = currentUser.signInDetails || {}
+            
+            const payload = {
+                name: currentUser.username,
+                email: currentUser.signInDetails?.loginId,
+                ...additionalData
+            };
+
+            const response = await axios.post('http://localhost:5001/api/v1/users/sync', payload, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log("Sync User Success:", response.data);
+            return response.data.data || response.data;
+        } catch (err) {
+            console.error("Failed to sync user to backend:", err);
+            return null;
+        }
+    };
+
     // Check if user is already authenticated
     useEffect(() => {
         const checkAuthState = async () => {
             try {
-                const userData = await getCurrentUserProfile();
-                setUser(userData);
+                await getCurrentUser();
+                const syncedData = await syncUserToBackend();
+                if (syncedData) {
+                    setUser(syncedData); 
+                } else {
+                    const userData = await getCurrentUserProfile();
+                    setUser(userData);
+                }
+
+            // eslint-disable-next-line no-unused-vars
             } catch (err) {
                 setUser(null);
             } finally {
@@ -39,6 +84,18 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = Hub.listen('auth', ({ payload }) => {
             switch (payload.event) {
+                case 'signIn':
+                case 'signInWithRedirect':
+                    setLoading(true);
+                    syncUserToBackend()
+                        .then((userData) => {
+                             if(userData) setUser(userData);
+                             else getCurrentUserProfile().then(setUser);
+                        })
+                        .catch(err => console.error("Post-login sync failed", err))
+                        .finally(() => setLoading(false));
+                    break;
+
                 case 'tokenRefresh_failure':
                 case 'signOut':
                     setUser(null);
@@ -49,6 +106,18 @@ export const AuthProvider = ({ children }) => {
 
         return unsubscribe;
     }, []);
+    
+    const googleSignIn = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            await signInWithRedirect({ provider: 'Google' });
+        } catch (err) {
+            setError(err.message || 'Failed to sign in with Google');
+            setLoading(false);
+            throw err;
+        }
+    };
 
     // Sign in function
     const signIn = async (email, password) => {
@@ -56,19 +125,19 @@ export const AuthProvider = ({ children }) => {
         setError(null);
         try {
             const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password });
-
+            
             if (isSignedIn) {
+                const tempAttributesStr = sessionStorage.getItem(`temp_attributes_${email}`);
+                const tempAttributes = tempAttributesStr ? JSON.parse(tempAttributesStr) : {};
                 try {
-                    // Use getCurrentUserProfile from userService instead of AWS Cognito's getCurrentUser
-                    const userData = await getCurrentUserProfile();
-
-                    // Combine profile data from API with Cognito attributes
+                    const userData = await syncUserToBackend(tempAttributes);
                     setUser(userData);
+
+                    sessionStorage.removeItem(`temp_attributes_${email}`);
                 } catch (profileErr) {
-                    throw Error(profileErr);
+                    console.log("Sync error after login:", profileErr)
                 }
             }
-
             return { isSignedIn, nextStep };
         } catch (err) {
             setError(err.message || 'Failed to sign in');
@@ -103,16 +172,18 @@ export const AuthProvider = ({ children }) => {
                 }
             });
             // Tạo profile trong MongoDB ngay sau khi đăng ký
-            await createUserProfile({
-                userId: result.userId || email.replace(/[@.]/g, '-'),
-                email: email,
-                name: userAttributes.name || email.split('@')[0],
-                gender: userAttributes.gender || '',
-                birthdate: userAttributes.birthdate || ''
-            });
+            // await createUserProfile({
+            //     userId: result.userId || email.replace(/[@.]/g, '-'),
+            //     email: email,
+            //     name: userAttributes.name || email.split('@')[0],
+            //     gender: userAttributes.gender || '',
+            //     birthdate: userAttributes.birthdate || ''
+            // });
+
             // Store password and attributes temporarily for use during confirmation
-            sessionStorage.setItem(`temp_password_${email}`, password);
-            sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(userAttributes));
+            sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(attributes));
+            // sessionStorage.setItem(`temp_password_${email}`, password);
+            // sessionStorage.setItem(`temp_attributes_${email}`, JSON.stringify(userAttributes));
             return result;
         } catch (err) {
             setError(err.message || 'Failed to sign up');
@@ -238,11 +309,13 @@ export const AuthProvider = ({ children }) => {
         forgotPasswordSubmit,
         changePassword,
         resendSignUpCode,
+        googleSignIn,
         isAuthenticated: !!user,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
