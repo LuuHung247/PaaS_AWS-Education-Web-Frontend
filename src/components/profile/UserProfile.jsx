@@ -106,7 +106,13 @@ const UserProfile = ({ onAvatarClick }) => {
                     bio: profileData.bio
                 };
 
-                await updateUserProfile(user.data._id, updatedData);
+                const userId = user.userId || user.data?._id || user.data?.cognito_sub;
+
+                if (!userId) {
+                     throw new Error('User ID is missing');
+                }
+
+                await updateUserProfile(userId, updatedData);
 
                 setSuccessMessage('Profile updated successfully!');
 

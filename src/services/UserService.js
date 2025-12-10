@@ -20,6 +20,7 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${idToken.toString()}`;
       }
       return config;
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       // If no session (not logged in), continue request without token
       return config;
