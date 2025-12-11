@@ -11,14 +11,14 @@ import ErrorAlert from '../components/common/ErrorAlert';
 import ErrorModal from '../components/common/ErrorModal';
 import Button from '../components/common/Button';
 
-import { useAuth } from '../context/AuthContext';
+// import { useAuth } from '../context/AuthContext';
 
 /**
  * Trang quản lý series
  */
 const SeriesManagementPage = () => {
-    const { user } = useAuth();
-    const isInstructor = user?.data?.role === 'instructor';
+    // const { user } = useAuth();
+    // const isInstructor = user?.data?.role === 'instructor';
 
     const {
         series,

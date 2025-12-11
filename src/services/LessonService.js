@@ -25,6 +25,7 @@ class LessonService {
             config.headers.Authorization = `Bearer ${token}`;
           }
           return config;
+        // eslint-disable-next-line no-unused-vars
         } catch (error) {
           return config;
         }

@@ -68,8 +68,8 @@ const SeriesDetailPage = () => {
 
                 // Check if current user is subscribed to this series
                 let isSubscribed = false;
-                if (user && user.data.serie_subcribe) {
-                    isSubscribed = user.data.serie_subcribe.includes(seriesId);
+                if (user && user.serie_subcribe) {
+                    isSubscribed = user.serie_subcribe.includes(seriesId);
                 }
 
                 setState(prev => ({
@@ -81,7 +81,7 @@ const SeriesDetailPage = () => {
                     lessons: lessonsData,
                     loading: false,
                     error: null,
-                    isOwner: user?.data?._id === seriesData.serie_user,
+                    isOwner: user?._id === seriesData.serie_user,
                     isSubscribed
                 }));
 
@@ -93,6 +93,7 @@ const SeriesDetailPage = () => {
                         isPublish: seriesData.isPublish
                     }
                 }));
+            // eslint-disable-next-line no-unused-vars
             } catch (err) {
                 setState(prev => ({ ...prev, loading: false, error: 'Không thể tải thông tin khóa học' }));
             }
