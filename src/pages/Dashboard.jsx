@@ -5,25 +5,17 @@ import { getCurrentUserProfile } from '../services/UserService';
 import MainLayout from '../components/layout/MainLayout';
 
 const Dashboard = () => {
-    const { loading: authLoading } = useAuth();
-    const [userAttributes, setUserAttributes] = useState({});
+    const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('welcome');
 
     useEffect(() => {
-        const loadUserProfile = async () => {
-            try {
-                const userData = await getCurrentUserProfile();
-                setUserAttributes(userData.data || {});
-            } catch (error) {
-                console.error('Error loading user profile:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (!authLoading) {
+            setLoading(false);
+        }
+    }, [authLoading]);
 
-        loadUserProfile();
-    }, []);
+    const isInstructor = user?.role === 'instructor';
 
     // Dữ liệu về các danh mục khóa học 
     const categories = [
@@ -126,7 +118,7 @@ const Dashboard = () => {
                         <div className="relative bg-gradient-to-r from-indigo-600 to-blue-500 rounded-xl overflow-hidden">
                             <div className="absolute inset-0 opacity-30 pattern-grid"></div>
                             <div className="relative px-6 py-12 md:py-16 md:px-12 text-white">
-                                <h2 className="text-2xl md:text-3xl font-bold mb-4">Chào mừng, {userAttributes.name || 'bạn'}!</h2>
+                                <h2 className="text-2xl md:text-3xl font-bold mb-4">Chào mừng, {user?.name || 'bạn'}!</h2>
                                 <p className="text-lg md:text-xl mb-6 text-indigo-100 max-w-3xl">
                                     Khám phá và chia sẻ kiến thức trên EduConnect.
                                 </p>
@@ -134,9 +126,11 @@ const Dashboard = () => {
                                     <Link to="/explore" className="px-6 py-3 bg-white text-indigo-700 font-medium rounded-lg hover:bg-opacity-90 transition shadow-lg">
                                         Khám phá khóa học
                                     </Link>
-                                    <Link to="/series" className="px-6 py-3 bg-indigo-700 bg-opacity-40 border border-white text-white font-medium rounded-lg hover:bg-opacity-60 transition">
-                                        Tạo khóa học
-                                    </Link>
+                                    {isInstructor && (
+                                        <Link to="/series" className="px-6 py-3 bg-indigo-700 bg-opacity-40 border border-white text-white font-medium rounded-lg hover:bg-opacity-60 transition">
+                                            Tạo khóa học
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                             <div className="hidden lg:block absolute right-0 top-0 h-full w-1/3">
@@ -154,16 +148,26 @@ const Dashboard = () => {
                             <div className="md:flex">
                                 <div className="md:w-1/3 bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
                                     <div className="flex flex-col items-center justify-center h-full">
-                                        <div className="w-24 h-24 rounded-full bg-white p-1 shadow-xl mb-4">
-                                            <div className="w-full h-full rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
-                                                {userAttributes.name ? userAttributes.name.charAt(0).toUpperCase() : '?'}
-                                            </div>
+                                        <div className="w-24 h-24 rounded-full bg-white p-1 shadow-xl mb-4 overflow-hidden">
+                                            {user?.avatar ? (
+                                                <img 
+                                                    src={user.avatar} 
+                                                    alt={user.name} 
+                                                    className="w-full h-full object-cover rounded-full"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
+                                                    {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+                                                </div>
+                                            )}
                                         </div>
-                                        <h3 className="text-xl font-bold">{userAttributes.name || 'Học viên'}</h3>
-                                        <p className="text-indigo-100 mt-1">{userAttributes.email || 'Không có email'}</p>
-                                        <div className="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-white bg-opacity-20 text-white text-sm">
-                                            <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                                            Thành viên
+                                        <h3 className="text-xl font-bold">{user?.name || 'Học viên'}</h3>
+                                        <p className="text-indigo-100 mt-1">{user?.email}</p>
+
+                                        {/* Hiển thị Role */}
+                                        <div className={`mt-4 inline-flex items-center px-3 py-1 rounded-full ${isInstructor ? 'bg-yellow-500' : 'bg-white bg-opacity-20'} text-white text-sm`}>
+                                            <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
+                                            {isInstructor ? 'Giảng viên' : 'Học viên'}
                                         </div>
                                     </div>
                                 </div>
@@ -178,7 +182,7 @@ const Dashboard = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm text-gray-600">Tên đầy đủ</div>
-                                                <div className="font-medium text-gray-900">{userAttributes.name || 'Chưa cập nhật'}</div>
+                                                <div className="font-medium text-gray-900">{user?.name || 'Chưa cập nhật'}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center border-b border-gray-100 pb-4">
@@ -189,7 +193,7 @@ const Dashboard = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm text-gray-600">Email</div>
-                                                <div className="font-medium text-gray-900">{userAttributes.email || 'Chưa cập nhật'}</div>
+                                                <div className="font-medium text-gray-900">{user?.email || 'Chưa cập nhật'}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center">
@@ -200,7 +204,7 @@ const Dashboard = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm text-gray-600">Số điện thoại</div>
-                                                <div className="font-medium text-gray-900">{userAttributes.phoneNumber || 'Chưa cập nhật'}</div>
+                                                <div className="font-medium text-gray-900">{user?.phoneNumber || 'Chưa cập nhật'}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -355,21 +359,21 @@ const Dashboard = () => {
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Họ và tên</label>
                                         <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {userAttributes.name || 'Chưa cập nhật'}
+                                            {user?.name || 'Chưa cập nhật'}
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Email</label>
                                         <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {userAttributes.email || 'Chưa cập nhật'}
+                                            {user?.email || 'Chưa cập nhật'}
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
                                         <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {userAttributes.phoneNumber || 'Chưa cập nhật'}
+                                            {user?.phoneNumber || 'Chưa cập nhật'}
                                         </div>
                                     </div>
 
@@ -459,7 +463,7 @@ const Dashboard = () => {
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">EduConnect</h1>
-                            <p className="text-lg text-gray-600">Chào mừng quay trở lại, {userAttributes.name || 'bạn'}!</p>
+                            <p className="text-lg text-gray-600">Chào mừng quay trở lại, {user?.name || 'bạn'}!</p>
                         </div>
                         <div className="mt-4 md:mt-0 flex gap-3">
                             <Link to="/explore" className="inline-flex items-center px-4 py-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-700 transition">
@@ -468,12 +472,14 @@ const Dashboard = () => {
                                 </svg>
                                 Khám phá khóa học
                             </Link>
-                            <Link to="/series" className="inline-flex items-center px-4 py-2 border border-indigo-600 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Tạo khóa học
-                            </Link>
+                            {isInstructor && (
+                                <Link to="/series" className="inline-flex items-center px-4 py-2 border border-indigo-600 rounded-lg text-indigo-600 hover:bg-indigo-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Tạo khóa học
+                                </Link>
+                            )}
                         </div>
                     </div>
 

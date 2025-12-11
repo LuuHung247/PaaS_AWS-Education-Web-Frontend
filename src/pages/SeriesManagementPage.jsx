@@ -11,10 +11,15 @@ import ErrorAlert from '../components/common/ErrorAlert';
 import ErrorModal from '../components/common/ErrorModal';
 import Button from '../components/common/Button';
 
+import { useAuth } from '../context/AuthContext';
+
 /**
  * Trang quản lý series
  */
 const SeriesManagementPage = () => {
+    const { user } = useAuth();
+    const isInstructor = user?.data?.role === 'instructor';
+
     const {
         series,
         loading,
@@ -83,97 +88,100 @@ const SeriesManagementPage = () => {
     );
 
     return (
-        <MainLayout>
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quản lý Series</h1>
-                        <p className="text-gray-600 mt-1">Tạo và quản lý các series bài giảng của bạn</p>
+        // isInstructor && (
+            <MainLayout>
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quản lý Series</h1>
+                            <p className="text-gray-600 mt-1">Tạo và quản lý các series bài giảng của bạn</p>
+                        </div>
+                        
+                        <Button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            variant="primary"
+                            className="mt-4 md:mt-0"
+                            icon={
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            }
+                        >
+                            Tạo Series Mới
+                        </Button>
+                        
                     </div>
-                    <Button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        variant="primary"
-                        className="mt-4 md:mt-0"
-                        icon={
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        }
-                    >
-                        Tạo Series Mới
-                    </Button>
-                </div>
+                    
+                    {/* Search and filter controls */}
+                    <SeriesFilters
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        filterStatus={filterStatus}
+                        onFilterStatusChange={setFilterStatus}
+                        sortBy={sortBy}
+                        onSortByChange={setSortBy}
+                    />
 
-                {/* Search and filter controls */}
-                <SeriesFilters
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    filterStatus={filterStatus}
-                    onFilterStatusChange={setFilterStatus}
-                    sortBy={sortBy}
-                    onSortByChange={setSortBy}
+                    {/* Loading and error states */}
+                    {loading ? (
+                        <Loading />
+                    ) : error ? (
+                        <ErrorAlert message={error} onDismiss={() => setError(null)} />
+                    ) : (
+                        <SeriesList
+                            series={series}
+                            onDeleteClick={(item) => {
+                                setSeriesToDelete(item);
+                                setIsDeleteModalOpen(true);
+                            }}
+                            onEditClick={handleOpenEditModal}
+                            onPublishClick={handleTogglePublish}
+                            noItemsComponent={emptyStateComponent}
+                        />
+                    )}
+                </div>
+                {/* Modals */}
+                <CreateSeriesModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSubmit={handleCreateSeries}
+                    formData={newSeries}
+                    setFormData={setNewSeries}
+                    formErrors={formErrors}
+                    isSubmitting={isSubmitting}
                 />
 
-                {/* Loading and error states */}
-                {loading ? (
-                    <Loading />
-                ) : error ? (
-                    <ErrorAlert message={error} onDismiss={() => setError(null)} />
-                ) : (
-                    <SeriesList
-                        series={series}
-                        onDeleteClick={(item) => {
-                            setSeriesToDelete(item);
-                            setIsDeleteModalOpen(true);
-                        }}
-                        onEditClick={handleOpenEditModal}
-                        onPublishClick={handleTogglePublish}
-                        noItemsComponent={emptyStateComponent}
-                    />
-                )}
-            </div>
+                <EditSeriesModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSubmit={handleEditSeries}
+                    formData={editFormData}
+                    setFormData={setEditFormData}
+                    formErrors={formErrors}
+                    isSubmitting={isSubmitting}
+                    series={seriesToEdit}
+                />
 
-            {/* Modals */}
-            <CreateSeriesModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreateSeries}
-                formData={newSeries}
-                setFormData={setNewSeries}
-                formErrors={formErrors}
-                isSubmitting={isSubmitting}
-            />
+                <DeleteSeriesModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => {
+                        setIsDeleteModalOpen(false);
+                        setSeriesToDelete(null);
+                    }}
+                    onConfirm={handleDeleteSeries}
+                    series={seriesToDelete}
+                    isDeleting={isDeleting}
+                />
 
-            <EditSeriesModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onSubmit={handleEditSeries}
-                formData={editFormData}
-                setFormData={setEditFormData}
-                formErrors={formErrors}
-                isSubmitting={isSubmitting}
-                series={seriesToEdit}
-            />
-
-            <DeleteSeriesModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => {
-                    setIsDeleteModalOpen(false);
-                    setSeriesToDelete(null);
-                }}
-                onConfirm={handleDeleteSeries}
-                series={seriesToDelete}
-                isDeleting={isDeleting}
-            />
-
-            <ErrorModal
-                isOpen={isErrorModalOpen}
-                onClose={() => setIsErrorModalOpen(false)}
-                title="Không thể xóa Series"
-                message={errorMessage}
-                buttonText="Đóng"
-            />
-        </MainLayout>
+                <ErrorModal
+                    isOpen={isErrorModalOpen}
+                    onClose={() => setIsErrorModalOpen(false)}
+                    title="Không thể xóa Series"
+                    message={errorMessage}
+                    buttonText="Đóng"
+                />
+            </MainLayout>
+        //)
     );
 };
 

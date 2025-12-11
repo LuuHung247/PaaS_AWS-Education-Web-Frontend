@@ -9,6 +9,8 @@ if (!region || !userPoolId || !userPoolClientId) {
   );
 }
 
+// const currentUrl = window.location.origin;
+
 export const awsConfig = {
   Auth: {
     Cognito: {
@@ -18,8 +20,10 @@ export const awsConfig = {
         oauth: {
           domain: 'ap-southeast-1xhsluhfqv.auth.ap-southeast-1.amazoncognito.com', // Domain
           scopes: ['email', 'profile', 'openid'],
-          redirectSignIn: ['http://localhost:5173'], // URL Frontend local
+          
+          redirectSignIn: ['http://localhost:5173'], 
           redirectSignOut: ['http://localhost:5173'],
+
           responseType: 'code',
           providers: ['Google']
         }

@@ -7,7 +7,6 @@ import {
     signInWithRedirect, 
     getCurrentUser, 
     fetchAuthSession,
-    fetchUserAttributes
 } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import axios from 'axios';
@@ -24,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    
     const syncUserToBackend = async (additionalData = {}) => {
         try {
             // 1. Lấy session hiện tại
@@ -44,13 +43,13 @@ export const AuthProvider = ({ children }) => {
             const payload = {
                 cognito_sub: payloadData.sub,
                 email: additionalData.email || payloadData.email,                
-                name: additionalData.name || payloadData.name || payloadData.given_name || payloadData['cognito:username'],                
-                gender: additionalData.gender || payloadData.gender,
-                birthdate: additionalData.birthdate || payloadData.birthdate,
+                name: additionalData.name || payloadData.name,
                 avatar: additionalData.avatar || payloadData.picture,
             };
+            
+            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api/v1';
 
-            const response = await axios.post('http://localhost:5001/api/v1/users/sync', payload, {
+            const response = await axios.post(`${backendUrl}/users/sync`, payload, {
                 headers: {
                     'Authorization': `Bearer ${tokenString}`,
                     'Content-Type': 'application/json'
@@ -58,10 +57,27 @@ export const AuthProvider = ({ children }) => {
             });
 
             console.log("Sync User Success:", response.data);
-            return response.data;
+            if (response.data && response.data.success) {
+                return response.data.data;
+            }
+            return null;
         } catch (err) {
             console.error("Failed to sync user to backend:", err);
             return null;
+        }
+    };
+
+    const refreshUser = async () => {
+        try {
+            const response = await getCurrentUserProfile();
+
+            if (response && response.success) {
+                setUser(response.data);
+            } else if (response) {
+                setUser(response);
+            }
+        } catch (err) {
+            console.error("Failed to refresh user data", err);
         }
     };
 
@@ -94,12 +110,10 @@ export const AuthProvider = ({ children }) => {
         const unsubscribe = Hub.listen('auth', ({ payload }) => {
             switch (payload.event) {
                 case 'signIn':
-                case 'signInWithRedirect':
                     setLoading(true);
                     syncUserToBackend()
                         .then((userData) => {
                              if(userData) setUser(userData);
-                             else getCurrentUserProfile().then(setUser);
                         })
                         .catch(err => console.error("Post-login sync failed", err))
                         .finally(() => setLoading(false));
@@ -108,7 +122,6 @@ export const AuthProvider = ({ children }) => {
                 case 'tokenRefresh_failure':
                 case 'signOut':
                     setUser(null);
-                    localStorage.clear();
                     break;
             }
         });
@@ -136,16 +149,8 @@ export const AuthProvider = ({ children }) => {
             const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password });
             
             if (isSignedIn) {
-                const tempAttributesStr = sessionStorage.getItem(`temp_attributes_${email}`);
-                const tempAttributes = tempAttributesStr ? JSON.parse(tempAttributesStr) : {};
-                try {
-                    const userData = await syncUserToBackend(tempAttributes);
-                    setUser(userData);
-
-                    sessionStorage.removeItem(`temp_attributes_${email}`);
-                } catch (profileErr) {
-                    console.log("Sync error after login:", profileErr)
-                }
+                const userData = await syncUserToBackend();
+                if (userData) setUser(userData);
             }
             return { isSignedIn, nextStep };
         } catch (err) {
@@ -334,6 +339,7 @@ export const AuthProvider = ({ children }) => {
         changePassword,
         resendSignUpCode,
         googleSignIn,
+        refreshUser,
         isAuthenticated: !!user,
     };
 

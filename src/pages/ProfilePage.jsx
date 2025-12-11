@@ -25,7 +25,7 @@ const ProfilePage = () => {
     // eslint-disable-next-line no-unused-vars
     const handleSaveAvatar = async (avatarUrl, coverImage) => {
        try {
-            const userId = user.userId || user.data?._id || user.data?.cognito_sub;
+            const userId = user._id || user.cognito_sub || user.userId;
             
             if (!userId) {
                 console.error("User ID not found");

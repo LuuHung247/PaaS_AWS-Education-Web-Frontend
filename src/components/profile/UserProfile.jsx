@@ -6,7 +6,7 @@ import FormSelect from '../auth/FormSelect';
 import { updateUserProfile } from '../../services/UserService';
 
 const UserProfile = ({ onAvatarClick }) => {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -31,16 +31,10 @@ const UserProfile = ({ onAvatarClick }) => {
     useEffect(() => {
         const loadUserData = async () => {
             if (user) {
-                try {
-                    setProfileData(user.data || {});
-                } catch (error) {
-                    console.error('Error loading user data:', error);
-                    setErrorMessage('Failed to load profile data. Please try again later.');
-                }
+                setProfileData(user); 
             }
             setLoading(false);
         };
-
         loadUserData();
     }, [user]);
 
@@ -88,8 +82,6 @@ const UserProfile = ({ onAvatarClick }) => {
         }
 
         setSaving(true);
-        setSuccessMessage('');
-        setErrorMessage('');
 
         try {
             if (user) {
@@ -107,13 +99,15 @@ const UserProfile = ({ onAvatarClick }) => {
                     bio: profileData.bio
                 };
 
-                const userId = user.userId || user.data?._id || user.data?.cognito_sub;
+                const userId = user._id || user.cognito_sub || user.userId;
 
                 if (!userId) {
                      throw new Error('User ID is missing');
                 }
 
                 await updateUserProfile(userId, updatedData);
+                
+                await refreshUser();
 
                 setSuccessMessage('Profile updated successfully!');
 
