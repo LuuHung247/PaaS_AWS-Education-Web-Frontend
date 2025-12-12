@@ -202,21 +202,16 @@ const SeriesDetailPage = () => {
         sendNotification: async (data) => {
             setState(prev => ({ ...prev, isSubmitting: true }));
             try {
-                // Here you would typically call an API to send the notification
-                // For now, we'll just simulate the action
-                console.log('Sending notification:', data);
+                await SeriesService.sendNotification(seriesId, {
+                    title: data.title,
+                    message: data.message
+                });
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Close the modal
                 setModals(prev => ({ ...prev, notification: false }));
-                
-                // Show success message (you might want to add a success modal)
-                alert('Thông báo đã được gửi thành công đến học viên!');
+                alert('Thông báo đã được gửi thành công đến danh sách học viên qua Email!');
             } catch (error) {
                 console.error('Error sending notification:', error);
-                alert('Có lỗi xảy ra khi gửi thông báo. Vui lòng thử lại.');
+                alert(error.message || 'Có lỗi xảy ra khi gửi thông báo.');
             } finally {
                 setState(prev => ({ ...prev, isSubmitting: false }));
             }
@@ -639,7 +634,7 @@ const SeriesDetailPage = () => {
                 isOpen={modals.subscribeSuccess}
                 onClose={() => setModals(prev => ({ ...prev, subscribeSuccess: false }))}
                 title="Đăng ký theo dõi thành công!"
-                message="Cảm ơn bạn đã đăng ký theo dõi khóa học này. Để có thể nhận được thông báo qua email mỗi khi có cập nhật mới, bạn cần phải xác nhận trong email của mình. Chúng tôi đã gửi email cho bạn, hãy tìm cả trong mục Spam nếu không thấy trong hộp thư đến."
+                message="Bạn đã đăng ký theo dõi khóa học này thành công. Bạn sẽ nhận được email thông báo mỗi khi giảng viên gửi cập nhật mới."
                 buttonText="Đã hiểu"
             />
 
