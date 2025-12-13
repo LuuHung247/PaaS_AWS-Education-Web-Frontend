@@ -169,14 +169,10 @@ const LessonArticle = ({ lesson }) => {
             }
 
             try {
-                // Create proxy URL for development to avoid CORS issues
-                let summaryUrl = lesson.lesson_summary;
-                if (import.meta.env.DEV) {
-                    summaryUrl = summaryUrl.replace(
-                        'https://edu-connect-s3.s3.ap-southeast-1.amazonaws.com',
-                        '/api/s3-proxy'
-                    );
-                }
+                // Fetch trực tiếp từ S3 (không dùng proxy)
+                const summaryUrl = lesson.lesson_summary;
+                
+              
                 
                 const response = await fetch(summaryUrl);
                 if (!response.ok) {
@@ -184,10 +180,12 @@ const LessonArticle = ({ lesson }) => {
                 }
                 
                 const text = await response.text();
+                
                 const formatted = sanitizeAndFormatText(text);
+              
                 setFormattedContent(formatted);
             } catch (err) {
-                console.error('Error fetching lesson summary:', err);
+                console.error('❌ Error fetching lesson summary:', err);
                 setError('Failed to load lesson summary');
             } finally {
                 setLoading(false);

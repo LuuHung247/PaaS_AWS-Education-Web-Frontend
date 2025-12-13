@@ -34,23 +34,6 @@ const cleanMarkdown = (text) => {
 };
 
 /**
- * Creates a proxy URL for S3 resources to avoid CORS issues during development
- * @param {string} url - Original S3 URL
- * @returns {string} - Proxy URL for development or original URL for production
- */
-const createProxyUrl = (url) => {
-  // Only use proxy in development environment
-  // if (import.meta.env.DEV) {
-  //   // Replace the S3 domain with our proxy endpoint
-  //   return url.replace(
-  //     'https://edu-connect-s3.s3.ap-southeast-1.amazonaws.com',
-  //     '/api/s3-proxy'
-  //   );
-  // }
-  return url;
-};
-
-/**
  * Parses timeline text data into structured timestamp objects
  * @param {string} timelineText - Raw timeline text data
  * @returns {Array} - Array of timestamp objects with time, seconds, label, and description
@@ -131,19 +114,20 @@ export const parseTimelineText = (timelineText) => {
  */
 export const fetchAndParseTimeline = async (timelineUrl) => {
   try {
-    // Use proxy URL in development to avoid CORS issues
-    const proxiedUrl = createProxyUrl(timelineUrl);
-
-    const response = await fetch(proxiedUrl);
+    // Fetch trực tiếp từ S3 (không dùng proxy)
+    const response = await fetch(timelineUrl);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch timeline data: ${response.status}`);
     }
 
     const timelineText = await response.text();
-    return parseTimelineText(timelineText);
+
+    const parsedTimestamps = parseTimelineText(timelineText);
+
+    return parsedTimestamps;
   } catch (error) {
-    console.error("Error fetching or parsing timeline:", error);
-    return []; // Return empty array on error
+    console.error("❌ Error fetching or parsing timeline:", error);
+    throw error; // Throw error để component có thể handle
   }
 };

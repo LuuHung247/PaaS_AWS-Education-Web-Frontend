@@ -16,10 +16,12 @@ const LessonTimestamps = ({ lesson, onTimestampClick }) => {
 
             try {
                 setLoading(true);
+                
                 const parsedTimestamps = await fetchAndParseTimeline(lesson.lesson_timeline);
+                
+                console.log('✅ Timeline loaded successfully:', parsedTimestamps.length, 'timestamps');
                 setTimestamps(parsedTimestamps);
             } catch (err) {
-                console.error('Error loading timeline data:', err);
                 setError('Failed to load timeline data');
             } finally {
                 setLoading(false);
