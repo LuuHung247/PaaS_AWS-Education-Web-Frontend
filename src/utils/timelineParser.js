@@ -8,8 +8,8 @@
  * @returns {number} - Time in seconds
  */
 export const timeStringToSeconds = (timeString) => {
-  const parts = timeString.split(':').map(part => parseInt(part, 10));
-  
+  const parts = timeString.split(":").map((part) => parseInt(part, 10));
+
   if (parts.length === 2) {
     // MM:SS format
     const [minutes, seconds] = parts;
@@ -19,7 +19,7 @@ export const timeStringToSeconds = (timeString) => {
     const [hours, minutes, seconds] = parts;
     return hours * 3600 + minutes * 60 + seconds;
   }
-  
+
   return 0;
 };
 
@@ -29,8 +29,8 @@ export const timeStringToSeconds = (timeString) => {
  * @returns {string} - Cleaned text
  */
 const cleanMarkdown = (text) => {
-  if (!text) return '';
-  return text.replace(/\*\*/g, '').trim();
+  if (!text) return "";
+  return text.replace(/\*\*/g, "").trim();
 };
 
 /**
@@ -40,13 +40,13 @@ const cleanMarkdown = (text) => {
  */
 const createProxyUrl = (url) => {
   // Only use proxy in development environment
-  if (import.meta.env.DEV) {
-    // Replace the S3 domain with our proxy endpoint
-    return url.replace(
-      'https://edu-connect-s3.s3.ap-southeast-1.amazonaws.com',
-      '/api/s3-proxy'
-    );
-  }
+  // if (import.meta.env.DEV) {
+  //   // Replace the S3 domain with our proxy endpoint
+  //   return url.replace(
+  //     'https://edu-connect-s3.s3.ap-southeast-1.amazonaws.com',
+  //     '/api/s3-proxy'
+  //   );
+  // }
   return url;
 };
 
@@ -57,21 +57,23 @@ const createProxyUrl = (url) => {
  */
 export const parseTimelineText = (timelineText) => {
   if (!timelineText) return [];
-  
+
   // Split text into lines
-  const lines = timelineText.split('\n').filter(line => line.trim() !== '');
-  
+  const lines = timelineText.split("\n").filter((line) => line.trim() !== "");
+
   const timestamps = [];
-  let currentStartTime = '';
-  let currentLabel = '';
-  let currentDesc = '';
-  
+  let currentStartTime = "";
+  let currentLabel = "";
+  let currentDesc = "";
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    
+
     // Check if this line contains a time range pattern like "[00:02] - [00:39]"
-    const timeRangeMatch = line.match(/\[(\d{2}:\d{2})\]\s*-\s*\[(\d{2}:\d{2})\]/);
-    
+    const timeRangeMatch = line.match(
+      /\[(\d{2}:\d{2})\]\s*-\s*\[(\d{2}:\d{2})\]/
+    );
+
     if (timeRangeMatch) {
       // If we already have a previous item, save it
       if (currentLabel) {
@@ -79,28 +81,28 @@ export const parseTimelineText = (timelineText) => {
           time: currentStartTime,
           seconds: timeStringToSeconds(currentStartTime),
           label: cleanMarkdown(currentLabel),
-          desc: cleanMarkdown(currentDesc)
+          desc: cleanMarkdown(currentDesc),
         });
       }
-      
+
       // Extract start time and initialize new item
       const startTime = timeRangeMatch[1];
       currentStartTime = startTime;
-      currentLabel = '';
-      currentDesc = '';
-      
+      currentLabel = "";
+      currentDesc = "";
+
       // Extract label from the same line (everything after the time range)
       const labelMatch = line.match(/\]\s*:\s*(.+)$/);
       if (labelMatch) {
         currentLabel = labelMatch[1].trim();
       }
-    } else if (line.startsWith('>')) {
+    } else if (line.startsWith(">")) {
       // This is a description line
       const desc = line.substring(1).trim(); // Remove '>' and trim
       if (desc) {
         currentDesc = desc;
       }
-    } else if (line.startsWith('##') || line.startsWith('#')) {
+    } else if (line.startsWith("##") || line.startsWith("#")) {
       // Skip header lines
       continue;
     } else if (line && !currentLabel) {
@@ -108,17 +110,17 @@ export const parseTimelineText = (timelineText) => {
       currentLabel = line;
     }
   }
-  
+
   // Don't forget the last item
   if (currentLabel && currentStartTime) {
     timestamps.push({
       time: currentStartTime,
       seconds: timeStringToSeconds(currentStartTime),
       label: cleanMarkdown(currentLabel),
-      desc: cleanMarkdown(currentDesc)
+      desc: cleanMarkdown(currentDesc),
     });
   }
-  
+
   return timestamps;
 };
 
@@ -131,16 +133,17 @@ export const fetchAndParseTimeline = async (timelineUrl) => {
   try {
     // Use proxy URL in development to avoid CORS issues
     const proxiedUrl = createProxyUrl(timelineUrl);
-    
+
     const response = await fetch(proxiedUrl);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch timeline data: ${response.status}`);
     }
-    
+
     const timelineText = await response.text();
     return parseTimelineText(timelineText);
   } catch (error) {
-    console.error('Error fetching or parsing timeline:', error);
+    console.error("Error fetching or parsing timeline:", error);
     return []; // Return empty array on error
   }
 };

@@ -203,8 +203,8 @@ const SeriesDetailPage = () => {
             setState(prev => ({ ...prev, isSubmitting: true }));
             try {
                 await SeriesService.sendNotification(seriesId, {
-                    title: data.title,
-                    message: data.message
+                    title: data.notification_title,
+                    message: data.notification_content
                 });
                 
                 setModals(prev => ({ ...prev, notification: false }));
