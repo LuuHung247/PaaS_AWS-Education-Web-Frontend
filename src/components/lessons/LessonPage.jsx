@@ -2,12 +2,12 @@ import { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useResponsiveSidebar, useLessonData, useLessonNavigation } from '../../hooks';
 import { useAuth } from '../../context/AuthContext';
-import { enterLesson, exitLesson } from '../../services/TrackingService';
+import { enterLesson, exitLesson, updateFocus, getTabId } from '../../services/TrackingService';
 import CommentSection from '../courses/CommentSection';
 import LessonContent from './LessonContent';
 import LessonSidebar from './LessonSidebar';
 import LessonNavigation from './LessonNavigation';
-import LessonHeader from './LessonHeader';
+import LessonHeader frogit am './LessonHeader';
 import LessonLoadingState from './LessonLoadingState';
 import LessonErrorState from './LessonErrorState';
 
@@ -33,7 +33,7 @@ const LessonDetailPage = () => {
     const { prevLesson, nextLesson } = useLessonNavigation(allLessons, lessonId);
     const { user } = useAuth();
 
-    // Track user's current lesson for AI Chatbot context
+    // Track user's current lesson for AI Chatbot context with multi-tab support
     useEffect(() => {
         if (!lesson || !user) return;
 
@@ -41,17 +41,31 @@ const LessonDetailPage = () => {
         const userId = user._id || user.cognito_sub || user.userId;
         if (!userId) return;
 
-        // Notify tracking service that user entered this lesson
+        // Get unique tab ID for this browser tab
+        const tabId = getTabId();
+
+        // Notify tracking service that user entered this lesson in this tab
         enterLesson({
             user_id: userId,
             lesson_id: lessonId,
             serie_id: seriesId,
-            lesson_title: lesson.title
+            lesson_title: lesson.title,
+            tab_id: tabId
         });
+
+        // Handle window focus/blur events for multi-tab tracking
+        const handleFocus = () => {
+            // User switched to this tab - update focus in tracking service
+            updateFocus(userId, tabId);
+        };
+
+        // Add event listener for window focus
+        window.addEventListener('focus', handleFocus);
 
         // Cleanup: notify tracking service when user leaves lesson
         return () => {
-            exitLesson(userId);
+            window.removeEventListener('focus', handleFocus);
+            exitLesson(userId, tabId);
         };
     }, [lessonId, seriesId, lesson, user]);
 

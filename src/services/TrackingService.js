@@ -31,21 +31,39 @@ api.interceptors.request.use(
 );
 
 /**
- * Notify tracking service that user entered a lesson page
+ * Generate or retrieve unique tab ID for this browser tab
+ * Uses sessionStorage so each tab has its own unique ID
+ * @returns {string} - Unique tab ID
+ */
+export const getTabId = () => {
+  let tabId = sessionStorage.getItem('educonnect_tab_id');
+  if (!tabId) {
+    // Generate UUID v4
+    tabId = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('educonnect_tab_id', tabId);
+  }
+  return tabId;
+};
+
+/**
+ * Notify tracking service that user entered a lesson page in this tab
  * @param {Object} data - Lesson tracking data
  * @param {string} data.user_id - User ID
  * @param {string} data.lesson_id - Lesson ID
  * @param {string} data.serie_id - Serie ID
  * @param {string} data.lesson_title - Lesson title (optional)
+ * @param {string} data.tab_id - Browser tab ID (optional, will auto-generate)
  * @returns {Promise} - Promise with the tracking response
  */
-export const enterLesson = async ({ user_id, lesson_id, serie_id, lesson_title }) => {
+export const enterLesson = async ({ user_id, lesson_id, serie_id, lesson_title, tab_id }) => {
   try {
+    const finalTabId = tab_id || getTabId();
     const response = await api.post('/tracking/lesson/enter', {
       user_id,
       lesson_id,
       serie_id,
       lesson_title,
+      tab_id: finalTabId,
     });
     return response.data;
   } catch (error) {
@@ -56,14 +74,17 @@ export const enterLesson = async ({ user_id, lesson_id, serie_id, lesson_title }
 };
 
 /**
- * Notify tracking service that user exited a lesson page
+ * Notify tracking service that user exited a lesson page in this tab
  * @param {string} user_id - User ID
+ * @param {string} tab_id - Browser tab ID (optional, will auto-generate)
  * @returns {Promise} - Promise with the tracking response
  */
-export const exitLesson = async (user_id) => {
+export const exitLesson = async (user_id, tab_id) => {
   try {
+    const finalTabId = tab_id || getTabId();
     const response = await api.post('/tracking/lesson/exit', {
       user_id,
+      tab_id: finalTabId,
     });
     return response.data;
   } catch (error) {
@@ -74,7 +95,28 @@ export const exitLesson = async (user_id) => {
 };
 
 /**
- * Get user's current lesson (for chatbot context)
+ * Update focus when user switches to this tab
+ * @param {string} user_id - User ID
+ * @param {string} tab_id - Browser tab ID (optional, will auto-generate)
+ * @returns {Promise} - Promise with the tracking response
+ */
+export const updateFocus = async (user_id, tab_id) => {
+  try {
+    const finalTabId = tab_id || getTabId();
+    const response = await api.post('/tracking/lesson/focus', {
+      user_id,
+      tab_id: finalTabId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating focus:", error);
+    // Don't throw error - tracking is not critical
+    return null;
+  }
+};
+
+/**
+ * Get user's current lesson (focused tab) and all active lessons
  * @param {string} user_id - User ID
  * @returns {Promise} - Promise with current lesson data
  */
