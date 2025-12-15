@@ -4,7 +4,7 @@ import UserProfile from '../components/profile/UserProfile';
 import AvatarModal from '../components/profile/AvatarModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { updateUserProfile } from '../services/UserService';
+import { updateUserProfileWithAvatar } from '../services/UserService';
 
 const ProfilePage = () => {
     const {user, loading } = useAuth();
@@ -22,19 +22,23 @@ const ProfilePage = () => {
         );
     }
 
-    // eslint-disable-next-line no-unused-vars
     const handleSaveAvatar = async (avatarUrl, coverImage) => {
        try {
             const userId = user._id || user.cognito_sub || user.userId;
-            
+
             if (!userId) {
                 console.error("User ID not found");
                 return;
             }
 
-            await updateUserProfile(userId, { 
-                avatar: avatarUrl 
-            });
+            // Use coverImage file if provided, otherwise use avatarUrl string
+            if (coverImage) {
+                // Upload file to backend
+                await updateUserProfileWithAvatar(userId, coverImage);
+            } else if (avatarUrl) {
+                // Update with URL string (not implemented yet)
+                console.warn("Avatar URL update not implemented");
+            }
 
             window.location.reload();
 

@@ -95,6 +95,40 @@ export const updateUserProfile = async (userId, profileData) => {
 };
 
 /**
+ * Updates user profile with avatar file upload
+ * @param {string} userId - User ID
+ * @param {File} avatarFile - Avatar image file
+ * @param {Object} additionalData - Additional profile data (optional)
+ * @returns {Promise} - Promise with the updated profile data
+ */
+export const updateUserProfileWithAvatar = async (userId, avatarFile, additionalData = {}) => {
+  try {
+    const formData = new FormData();
+
+    // Append avatar file
+    if (avatarFile) {
+      formData.append('avatar', avatarFile);
+    }
+
+    // Append additional profile data
+    Object.keys(additionalData).forEach(key => {
+      formData.append(key, additionalData[key]);
+    });
+
+    const response = await api.put(`/users/${userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile with avatar:", error);
+    throw error;
+  }
+};
+
+/**
  * Fetches user profile by user ID
  * @param {string} userId - User ID to fetch profile for
  * @returns {Promise} - Promise with the user profile data
