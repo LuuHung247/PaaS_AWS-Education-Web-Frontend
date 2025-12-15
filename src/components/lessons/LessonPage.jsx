@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useResponsiveSidebar, useLessonData, useLessonNavigation } from '../../hooks';
+import { useAuth } from '../../context/AuthContext';
+import { enterLesson, exitLesson } from '../../services/TrackingService';
 import CommentSection from '../courses/CommentSection';
 import LessonContent from './LessonContent';
 import LessonSidebar from './LessonSidebar';
@@ -29,6 +31,29 @@ const LessonDetailPage = () => {
     const [isSidebarOpen, toggleSidebar] = useResponsiveSidebar(false, 1024);
     const { lesson, series, allLessons, loading, error } = useLessonData(seriesId, lessonId);
     const { prevLesson, nextLesson } = useLessonNavigation(allLessons, lessonId);
+    const { user } = useAuth();
+
+    // Track user's current lesson for AI Chatbot context
+    useEffect(() => {
+        if (!lesson || !user) return;
+
+        // Get user ID from various possible fields
+        const userId = user._id || user.cognito_sub || user.userId;
+        if (!userId) return;
+
+        // Notify tracking service that user entered this lesson
+        enterLesson({
+            user_id: userId,
+            lesson_id: lessonId,
+            serie_id: seriesId,
+            lesson_title: lesson.title
+        });
+
+        // Cleanup: notify tracking service when user leaves lesson
+        return () => {
+            exitLesson(userId);
+        };
+    }, [lessonId, seriesId, lesson, user]);
 
     const handleCompleteSeries = () => {
         navigate(`/series/${seriesId}`);
