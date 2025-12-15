@@ -59,12 +59,27 @@ const LessonDetailPage = () => {
             updateFocus(userId, tabId);
         };
 
-        // Add event listener for window focus
+        // Handle tab close/browser close using beforeunload
+        const handleBeforeUnload = () => {
+            // Call exitLesson to notify server
+            // Note: This may not always complete if browser closes too fast
+            // Backend auto-cleanup (30 min timeout) will handle missed cleanups
+            try {
+                exitLesson(userId, tabId);
+            } catch (error) {
+                // Ignore errors on page unload
+                console.log('Exit lesson tracking failed (expected on page close):', error);
+            }
+        };
+
+        // Add event listeners
         window.addEventListener('focus', handleFocus);
+        window.addEventListener('beforeunload', handleBeforeUnload);
 
         // Cleanup: notify tracking service when user leaves lesson
         return () => {
             window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
             exitLesson(userId, tabId);
         };
     }, [lessonId, seriesId, lesson, user]);
