@@ -7,7 +7,7 @@ import CommentSection from '../courses/CommentSection';
 import LessonContent from './LessonContent';
 import LessonSidebar from './LessonSidebar';
 import LessonNavigation from './LessonNavigation';
-import LessonHeader frogit am './LessonHeader';
+import LessonHeader from './LessonHeader';
 import LessonLoadingState from './LessonLoadingState';
 import LessonErrorState from './LessonErrorState';
 
