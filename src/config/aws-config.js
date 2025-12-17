@@ -9,7 +9,15 @@ if (!region || !userPoolId || !userPoolClientId) {
   );
 }
 
-// const currentUrl = window.location.origin;
+// Determine redirect URLs based on environment
+const getRedirectUrl = () => {
+  if (typeof window !== "undefined") {
+    // SỬA Ở ĐÂY: Bỏ dấu / đi
+    return window.location.origin;
+  }
+  // Fallback for SSR or build time (cũng nên bỏ / cho đồng bộ nếu config local không có /)
+  return "http://localhost:5173";
+};
 
 export const awsConfig = {
   Auth: {
@@ -18,16 +26,18 @@ export const awsConfig = {
       userPoolClientId: userPoolClientId,
       loginWith: {
         oauth: {
-          domain: 'ap-southeast-1xhsluhfqv.auth.ap-southeast-1.amazoncognito.com', // Domain
-          scopes: ['email', 'profile', 'openid'],
-          
-          redirectSignIn: ['http://localhost:5173'], 
-          redirectSignOut: ['http://localhost:5173'],
+          domain:
+            "ap-southeast-1xhsluhfqv.auth.ap-southeast-1.amazoncognito.com",
+          scopes: ["email", "profile", "openid"],
 
-          responseType: 'code',
-          providers: ['Google']
-        }
-      }
-    }
-  }
+          // Amplify v6 yêu cầu mảng (Array)
+          redirectSignIn: [getRedirectUrl()],
+          redirectSignOut: [getRedirectUrl()],
+
+          responseType: "code",
+          providers: ["Google"],
+        },
+      },
+    },
+  },
 };

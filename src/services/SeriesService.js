@@ -20,7 +20,7 @@ class SeriesService {
             config.headers.Authorization = `Bearer ${token}`;
           }
           return config;
-        // eslint-disable-next-line no-unused-vars
+          // eslint-disable-next-line no-unused-vars
         } catch (error) {
           return config;
         }
@@ -73,7 +73,7 @@ class SeriesService {
    */
   async getAllSeries() {
     try {
-      const response = await this.api.get("/series");
+      const response = await this.api.get("/series/");
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -279,7 +279,10 @@ class SeriesService {
    */
   async sendNotification(seriesId, notificationData) {
     try {
-      const response = await this.api.post(`/series/${seriesId}/notify`, notificationData);
+      const response = await this.api.post(
+        `/series/${seriesId}/notify`,
+        notificationData
+      );
       return response.data;
     } catch (error) {
       throw this.handleError(error);
