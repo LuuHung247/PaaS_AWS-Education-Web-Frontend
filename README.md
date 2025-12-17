@@ -171,3 +171,5 @@ src/
    - Insufficient memory during build - increase Docker's resource allocation
 
 4. **AWS Cognito Connection Issues**: Check if the correct AWS region and pool IDs are configured.
+
+docker build   --build-arg VITE_BACKEND_URL=https://ecom-devops.online/api/v1   --build-arg VITE_AWS_REGION=ap-southeast-1   --build-arg VITE_AWS_USER_POOL_ID=ap-southeast-1_XhsLUhFqv   --build-arg VITE_AWS_USER_POOL_CLIENT_ID=4pp6k4om5klflugd46q7kvl7t7   -t hunglk247/educonnect-frontend:k8s-v3   .
