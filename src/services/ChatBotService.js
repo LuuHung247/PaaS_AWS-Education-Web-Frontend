@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 class ChatBotService {
   constructor() {
@@ -11,7 +11,7 @@ class ChatBotService {
     // Thêm tin nhắn chào mừng nếu chưa có
     if (this.chatHistory.length === 0) {
       const welcomeMessage = {
-        role: 'bot',
+        role: "bot",
         content: `Xin chào! Tôi là trợ lý EduConnect 👋
 Tôi có thể giúp bạn:
 - Tìm hiểu về các khóa học
@@ -26,17 +26,17 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
   }
 
   loadChatHistoryFromLocalStorage() {
-    const storedHistory = localStorage.getItem('chatHistory');
+    const storedHistory = localStorage.getItem("chatHistory");
     return storedHistory ? JSON.parse(storedHistory) : [];
   }
 
   saveChatHistoryToLocalStorage() {
-    localStorage.setItem('chatHistory', JSON.stringify(this.chatHistory));
+    localStorage.setItem("chatHistory", JSON.stringify(this.chatHistory));
   }
 
   clearChatHistory() {
     this.chatHistory = [];
-    localStorage.removeItem('chatHistory');
+    localStorage.removeItem("chatHistory");
     return this.chatHistory;
   }
 
@@ -60,9 +60,9 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
     try {
       if (!skipAddingUserMessage) {
         this.chatHistory.push({
-          role: 'user',
+          role: "user",
           content: message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
       
@@ -101,10 +101,10 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
         content: botResponseText,
         timestamp: new Date().toISOString()
       };
-      
+
       this.chatHistory.push(botMessage);
       this.saveChatHistoryToLocalStorage();
-      
+
       return botMessage;
     } catch (error) {
       console.error('Error in ChatBotService:', error);
@@ -113,12 +113,12 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
         role: 'bot',
         content: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.',
         timestamp: new Date().toISOString(),
-        error: true
+        error: true,
       };
-      
+
       this.chatHistory.push(errorMessage);
       this.saveChatHistoryToLocalStorage();
-      
+
       throw error;
     }
   }

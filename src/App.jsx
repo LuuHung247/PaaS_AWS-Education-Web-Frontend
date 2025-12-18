@@ -33,15 +33,63 @@ import SubscribedSeriesPage from './pages/SubscribeSeriesPage'
 Amplify.configure(awsConfig);
 
 // Configure token signing for Cognito
+// Cookie utility functions with security attributes
+const getCookieDomain = () => {
+  // For localhost development, don't set domain attribute
+  // For production, set to your domain (e.g., '.yourdomain.com')
+  return window.location.hostname === 'localhost' ? null : 
+    '.' + window.location.hostname.split('.').slice(-2).join('.');
+};
+
+const setCookie = (key, value, days = 7) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  const domain = getCookieDomain();
+  const secure = window.location.protocol === 'https:';
+  
+  let cookieString = key + '=' + encodeURIComponent(value) + ';expires=' + expires + ';path=/;SameSite=Strict';
+  
+  if (secure) {
+    cookieString += ';Secure';
+  }
+  
+  if (domain) {
+    cookieString += ';domain=' + domain;
+  }
+  
+  document.cookie = cookieString;
+};
+
+const getCookie = (key) => {
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    if (cookie.startsWith(key + '=')) {
+      return decodeURIComponent(cookie.substring(key.length + 1));
+    }
+  }
+  return null;
+};
+
+const removeCookie = (key) => {
+  const domain = getCookieDomain();
+  let cookieString = key + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Strict';
+  
+  if (domain) {
+    cookieString += ';domain=' + domain;
+  }
+  
+  document.cookie = cookieString;
+};
+
 cognitoUserPoolsTokenProvider.setKeyValueStorage({
   getItem(key) {
-    return localStorage.getItem(key);
+    return getCookie(key);
   },
   setItem(key, value) {
-    localStorage.setItem(key, value);
+    setCookie(key, value);
   },
   removeItem(key) {
-    localStorage.removeItem(key);
+    removeCookie(key);
   }
 });
 
