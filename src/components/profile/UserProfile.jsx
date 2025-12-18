@@ -141,7 +141,7 @@ const UserProfile = ({ onAvatarClick }) => {
                 <div className="flex items-center">
                     <div className="relative group">
                         <button 
-                            className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 text-3xl font-bold uppercase mr-4 border-4 border-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="w-24 h-24 rounded-full bg-white p-1 shadow-xl flex items-center justify-center text-indigo-600 text-3xl font-bold uppercase mr-4 border-4 border-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             onClick={onAvatarClick}
                             aria-label="Change avatar"
                         >
@@ -149,10 +149,12 @@ const UserProfile = ({ onAvatarClick }) => {
                                 <img 
                                     src={profileData.avatar} 
                                     alt={profileData.name} 
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover rounded-full"
                                 />
                             ) : (
-                                profileData.name ? profileData.name.charAt(0) : 'U'
+                                <div className="w-full h-full rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
+                                    {profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'}
+                                </div>
                             )}
                         </button>
                         <div className="absolute bottom-0 right-4 bg-indigo-600 text-white text-center text-xs rounded-full py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
