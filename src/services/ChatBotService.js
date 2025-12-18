@@ -7,9 +7,6 @@ class ChatBotService {
     // Khởi tạo lịch sử chat
     this.chatHistory = this.loadChatHistoryFromLocalStorage();
 
-    // Lesson context - được set khi user vào lesson page
-    this.currentLessonContext = null;
-
     // Thêm tin nhắn chào mừng nếu chưa có
     if (this.chatHistory.length === 0) {
       const welcomeMessage = {
@@ -28,8 +25,12 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
   }
 
   // Set lesson context khi user vào lesson page
-  setCurrentLesson(lessonId, seriesId) {
-    this.currentLessonContext = { lesson_id: lessonId, series_id: seriesId };
+  setCurrentLesson(lessonId, seriesId, lessonData = null) {
+    this.currentLessonContext = {
+      lesson_id: lessonId,
+      series_id: seriesId,
+      lesson_data: lessonData  // Lưu luôn lesson data để gửi cho AI
+    };
   }
 
   // Clear lesson context khi user rời lesson page
@@ -61,9 +62,8 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
   getCurrentUserId() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      // Cognito user có cognito_sub hoặc _id
-      return user?.cognito_sub || user?._id || user?.id || "guest_user";
-    } catch {
+      return user?.id || user?._id || "guest_user";
+    } catch (e) {
       return "guest_user";
     }
   }
@@ -79,22 +79,41 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
         });
       }
 
-      // Build payload dựa vào lesson context
+      // --- CẬP NHẬT PAYLOAD CHUẨN BACKEND ---
+      // Backend yêu cầu: user_question, user_id, lesson_id
       const payload = {
         user_question: message,
         user_id: this.getCurrentUserId(),
+        lesson_id: "general_chat", // ID mặc định cho chat chung
+        is_in_lesson: false, // Đánh dấu là chat ngoài bài học
         top_k: 5,
       };
 
-      // Nếu user đang trong lesson, gửi lesson_id và is_in_lesson
+      // Nếu user đang trong lesson, gửi lesson_id, lesson_data và is_in_lesson
       if (this.currentLessonContext) {
         payload.lesson_id = this.currentLessonContext.lesson_id;
+        payload.serie_id = this.currentLessonContext.series_id;
         payload.is_in_lesson = true;
+
+        // Truyền lesson_data nếu có (để AI có context về lesson hiện tại)
+        if (this.currentLessonContext.lesson_data) {
+          payload.lesson_data = this.currentLessonContext.lesson_data;
+          console.log('[ChatBot] Sending payload with lesson_data:', {
+            has_lesson_data: true,
+            transcript: this.currentLessonContext.lesson_data.lesson_transcript,
+            summary: this.currentLessonContext.lesson_data.lesson_summary,
+            timeline: this.currentLessonContext.lesson_data.lesson_timeline
+          });
+        } else {
+          console.warn('[ChatBot] No lesson_data in currentLessonContext!');
+        }
       } else {
         // User không trong lesson, AI sẽ tư vấn chung về khóa học
         payload.lesson_id = "general_chat";
         payload.is_in_lesson = false;
       }
+
+      console.log('[ChatBot] Final payload:', payload);
 
       const response = await fetch(`${this.agentApiUrl}/query`, {
         method: "POST",

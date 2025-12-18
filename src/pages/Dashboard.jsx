@@ -165,8 +165,8 @@ const Dashboard = () => {
                                         <p className="text-indigo-100 mt-1">{user?.email}</p>
 
                                         {/* Hiển thị Role */}
-                                        <div className={`mt-4 inline-flex items-center px-3 py-1 rounded-full ${isInstructor ? 'bg-yellow-500' : 'bg-white bg-opacity-20'} text-white text-sm`}>
-                                            <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
+                                        <div className={`mt-4 inline-flex items-center justify-center px-3 py-1 rounded-full ${isInstructor ? 'bg-yellow-500' : 'bg-white bg-opacity-20'} text-indigo-600 text-center text-sm`}>
+                                            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                                             {isInstructor ? 'Giảng viên' : 'Học viên'}
                                         </div>
                                     </div>
@@ -196,17 +196,7 @@ const Dashboard = () => {
                                                 <div className="font-medium text-gray-900">{user?.email || 'Chưa cập nhật'}</div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <div className="text-sm text-gray-600">Số điện thoại</div>
-                                                <div className="font-medium text-gray-900">{user?.phoneNumber || 'Chưa cập nhật'}</div>
-                                            </div>
-                                        </div>
+                                        
                                     </div>
                                     <div className="flex gap-4">
                                         <Link to="/profile" className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">

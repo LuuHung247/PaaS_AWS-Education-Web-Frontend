@@ -46,14 +46,39 @@ const LessonDetailPage = () => {
         const tabId = getTabId();
 
         // Set lesson context cho chatbot - để AI biết user đang ở lesson nào
-        chatBotService.setCurrentLesson(lessonId, seriesId);
+        // Truyền cả lesson data để AI có thể hiểu nội dung bài học
+        // Support both underscore and camelCase field names for backward compatibility
+        const lessonData = {
+            lesson_title: lesson.lesson_title || lesson.title,
+            lesson_description: lesson.lesson_description || lesson.description,
+            lesson_serie: seriesId,
+            lesson_video: lesson.lesson_video || lesson.videoUrl,
+            lesson_transcript: lesson.lesson_transcript || lesson.transcriptUrl,
+            transcript_status: lesson.transcript_status || lesson.transcriptStatus,
+            lesson_documents: lesson.lesson_documents || lesson.documents || [],
+            lesson_summary: lesson.lesson_summary || lesson.summaryUrl,
+            lesson_timeline: lesson.lesson_timeline || lesson.timelineUrl,
+            createdAt: lesson.createdAt,
+            updatedAt: lesson.updatedAt
+        };
+
+        console.log('[ChatBot] Setting lesson context:', {
+            lessonId,
+            seriesId,
+            hasTranscript: !!(lesson.lesson_transcript || lesson.transcriptUrl),
+            hasSummary: !!(lesson.lesson_summary || lesson.summaryUrl),
+            hasTimeline: !!(lesson.lesson_timeline || lesson.timelineUrl),
+            lessonData
+        });
+
+        chatBotService.setCurrentLesson(lessonId, seriesId, lessonData);
 
         // Notify tracking service that user entered this lesson in this tab
         enterLesson({
             user_id: userId,
             lesson_id: lessonId,
             serie_id: seriesId,
-            lesson_title: lesson.title,
+            lesson_title: lesson.lesson_title || lesson.title,
             tab_id: tabId
         });
 
