@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
                 name: additionalData.name || payloadData.name,
                 avatar: additionalData.avatar || payloadData.picture,
             };
-            
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api/v1';
+
+            const backendUrl = import.meta.env.VITE_USER_URL || 'http://localhost:5002/api/v1';
 
             const response = await axios.post(`${backendUrl}/users/sync`, payload, {
                 headers: {

@@ -1,13 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 class ChatBotService {
   constructor() {
     // URL của Agent Service (đã cấu hình trong docker-compose)
     this.agentApiUrl =
-      import.meta.env.VITE_AI_AGENT_URL || "http://localhost:8000";
+      import.meta.env.VITE_AI_AGENT_URL || "http://localhost:8015";
 
     // Khởi tạo lịch sử chat
     this.chatHistory = this.loadChatHistoryFromLocalStorage();
+
+    // Lesson context - được set khi user vào lesson page
+    this.currentLessonContext = null;
 
     // Thêm tin nhắn chào mừng nếu chưa có
     if (this.chatHistory.length === 0) {
@@ -24,6 +25,16 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
       this.chatHistory.push(welcomeMessage);
       this.saveChatHistoryToLocalStorage();
     }
+  }
+
+  // Set lesson context khi user vào lesson page
+  setCurrentLesson(lessonId, seriesId) {
+    this.currentLessonContext = { lesson_id: lessonId, series_id: seriesId };
+  }
+
+  // Clear lesson context khi user rời lesson page
+  clearCurrentLesson() {
+    this.currentLessonContext = null;
   }
 
   loadChatHistoryFromLocalStorage() {
@@ -45,13 +56,14 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
     return this.chatHistory;
   }
 
-  // Lấy User ID từ localStorage (giả định bạn lưu user info ở đó khi login)
+  // Lấy User ID từ localStorage (AuthContext lưu ở đây)
   // Nếu chưa login, dùng tạm ID "guest"
   getCurrentUserId() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      return user?.id || user?._id || "guest_user";
-    } catch (e) {
+      // Cognito user có cognito_sub hoặc _id
+      return user?.cognito_sub || user?._id || user?.id || "guest_user";
+    } catch {
       return "guest_user";
     }
   }
@@ -67,15 +79,22 @@ Hãy hỏi tôi bất cứ điều gì bạn cần!`,
         });
       }
 
-      // --- CẬP NHẬT PAYLOAD CHUẨN BACKEND ---
-      // Backend yêu cầu: user_question, user_id, lesson_id
+      // Build payload dựa vào lesson context
       const payload = {
         user_question: message,
         user_id: this.getCurrentUserId(),
-        lesson_id: "general_chat", // ID mặc định cho chat chung
-        is_in_lesson: false, // Đánh dấu là chat ngoài bài học
         top_k: 5,
       };
+
+      // Nếu user đang trong lesson, gửi lesson_id và is_in_lesson
+      if (this.currentLessonContext) {
+        payload.lesson_id = this.currentLessonContext.lesson_id;
+        payload.is_in_lesson = true;
+      } else {
+        // User không trong lesson, AI sẽ tư vấn chung về khóa học
+        payload.lesson_id = "general_chat";
+        payload.is_in_lesson = false;
+      }
 
       const response = await fetch(`${this.agentApiUrl}/query`, {
         method: "POST",

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useResponsiveSidebar, useLessonData, useLessonNavigation } from '../../hooks';
 import { useAuth } from '../../context/AuthContext';
 import { enterLesson, exitLesson, updateFocus, getTabId } from '../../services/TrackingService';
+import chatBotService from '../../services/ChatBotService';
 import CommentSection from '../courses/CommentSection';
 import LessonContent from './LessonContent';
 import LessonSidebar from './LessonSidebar';
@@ -44,6 +45,9 @@ const LessonDetailPage = () => {
         // Get unique tab ID for this browser tab
         const tabId = getTabId();
 
+        // Set lesson context cho chatbot - để AI biết user đang ở lesson nào
+        chatBotService.setCurrentLesson(lessonId, seriesId);
+
         // Notify tracking service that user entered this lesson in this tab
         enterLesson({
             user_id: userId,
@@ -80,6 +84,8 @@ const LessonDetailPage = () => {
         return () => {
             window.removeEventListener('focus', handleFocus);
             window.removeEventListener('beforeunload', handleBeforeUnload);
+            // Clear lesson context khỏi chatbot
+            chatBotService.clearCurrentLesson();
             exitLesson(userId, tabId);
         };
     }, [lessonId, seriesId, lesson, user]);

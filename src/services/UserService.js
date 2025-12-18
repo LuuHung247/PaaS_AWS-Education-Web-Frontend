@@ -3,7 +3,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
 
 // Create an axios instance with default configurations
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: import.meta.env.VITE_USER_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,7 +20,7 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${idToken.toString()}`;
       }
       return config;
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       // If no session (not logged in), continue request without token
       return config;
@@ -44,7 +44,7 @@ api.interceptors.request.use(
 export const createUserProfile = async (profileData) => {
   try {
     const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/users/profile`,
+      `${import.meta.env.VITE_USER_URL}/users/profile`,
       profileData,
       {
         headers: {
@@ -67,7 +67,7 @@ export const getCurrentUserProfile = async () => {
   try {
     const { tokens } = await fetchAuthSession();
     if (!tokens?.idToken) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
     const response = await api.get(`/users/profile`);
     return response.data;
@@ -101,23 +101,27 @@ export const updateUserProfile = async (userId, profileData) => {
  * @param {Object} additionalData - Additional profile data (optional)
  * @returns {Promise} - Promise with the updated profile data
  */
-export const updateUserProfileWithAvatar = async (userId, avatarFile, additionalData = {}) => {
+export const updateUserProfileWithAvatar = async (
+  userId,
+  avatarFile,
+  additionalData = {}
+) => {
   try {
     const formData = new FormData();
 
     // Append avatar file
     if (avatarFile) {
-      formData.append('avatar', avatarFile);
+      formData.append("avatar", avatarFile);
     }
 
     // Append additional profile data
-    Object.keys(additionalData).forEach(key => {
+    Object.keys(additionalData).forEach((key) => {
       formData.append(key, additionalData[key]);
     });
 
     const response = await api.put(`/users/${userId}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
 
